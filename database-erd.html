@@ -1,0 +1,6848 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QueenBeautiful / BeautiQ — Sơ Đồ Cơ Sở Dữ Liệu ERD Tương Tác (79 Bảng CSDL)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --bg-primary: #070a13;
+      --bg-secondary: #0d1424;
+      --bg-card: #131d33;
+      --bg-card-header: #1a2744;
+      --bg-hover: #1e2f52;
+      --border-color: #223554;
+      --border-focus: #38bdf8;
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --panel-width: 530px;
+      
+      --color-pk: #fbbf24;
+      --color-fk: #38bdf8;
+      --color-uq: #c084fc;
+
+      --cluster-commerce: #3b82f6;
+      --cluster-catalog: #10b981;
+      --cluster-promo: #f59e0b;
+      --cluster-ctv: #ec4899;
+      --cluster-warehouse: #8b5cf6;
+      --cluster-payment: #06b6d4;
+      --cluster-support: #64748b;
+      --cluster-rbac: #ef4444;
+
+      --line-stroke: rgba(56, 189, 248, 0.45);
+      --line-active: #00f0ff;
+      --line-neighbor: #10b981;
+
+      --glow-active: rgba(56, 189, 248, 0.85);
+      --glow-neighbor: rgba(16, 185, 129, 0.75);
+    }
+
+        [data-theme="light"] {
+      --bg-primary: #f1f5f9;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-header: #f8fafc;
+      --bg-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --border-focus: #0284c7;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --line-stroke: rgba(100, 116, 139, 0.55);
+      --line-active: #0284c7;
+      --line-neighbor: #059669;
+      --glow-active: rgba(2, 132, 199, 0.6);
+      --glow-neighbor: rgba(5, 150, 105, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP NAVBAR */
+    .navbar {
+      height: 56px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 15px;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+    }
+
+    .brand-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      font-size: 10.5px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--border-focus);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 700;
+      border: 1px solid var(--border-focus);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-box {
+      position: relative;
+      width: 280px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 12px;
+    }
+
+    .search-results-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 1100;
+      display: none;
+    }
+
+    .search-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 11.5px;
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-item:hover, .search-item.selected {
+      background: var(--bg-hover);
+    }
+
+    .search-item-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-item-match {
+      font-size: 10px;
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-focus);
+    }
+
+    .btn-active-focus {
+      background: #0284c7 !important;
+      border-color: #38bdf8 !important;
+      color: #fff !important;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+    }
+
+    /* SECONDARY CONTROL BAR (CLUSTER FILTER PILLS) */
+    .sub-bar {
+      height: 42px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 6px;
+      overflow-x: auto;
+      z-index: 900;
+      flex-shrink: 0;
+    }
+
+    .sub-bar::-webkit-scrollbar {
+      height: 3px;
+    }
+    .sub-bar::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+
+    .sub-bar-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+
+    .pill-item {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .pill-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+    }
+
+    .pill-item.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* MAIN VIEWPORT & PAN/ZOOM CANVAS */
+    .viewport-container {
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 98px);
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.35) 0%, transparent 85%);
+      cursor: grab;
+    }
+
+    .viewport-container.dragging {
+      cursor: grabbing;
+    }
+
+    .canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      width: 6650px; height: 3404px;
+    }
+
+    svg.connections-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 6650px; height: 3404px;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .conn-path {
+      fill: none;
+      stroke: var(--line-stroke);
+      stroke-width: 1.5px;
+    }
+
+    .conn-path.active-direct {
+      stroke: var(--line-active) !important;
+      stroke-width: 2.8px !important;
+      opacity: 1 !important;
+      stroke-dasharray: 6 3;
+      animation: dashFlow 1s linear infinite;
+      z-index: 30;
+    }
+
+    .conn-path.dimmed {
+      opacity: 0.05 !important;
+    }
+
+    @keyframes dashFlow {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* TABLE CARD */
+    .table-card {
+      position: absolute;
+      width: 280px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      z-index: 20;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .table-card:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+      z-index: 45;
+    }
+
+    .table-card.active {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.75), 0 0 0 2px #38bdf8 !important;
+      z-index: 60 !important;
+      opacity: 1 !important;
+    }
+
+    .table-card.neighbor {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.6), 0 0 0 1.5px #10b981 !important;
+      z-index: 50 !important;
+      opacity: 1 !important;
+    }
+
+    .table-card.dimmed {
+      opacity: 0.15 !important;
+    }
+
+    .table-header {
+      padding: 7px 10px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      color: #ffffff;
+    }
+
+    .cluster-commerce { background: var(--cluster-commerce); }
+    .cluster-catalog { background: var(--cluster-catalog); }
+    .cluster-promo { background: var(--cluster-promo); }
+    .cluster-ctv { background: var(--cluster-ctv); }
+    .cluster-warehouse { background: var(--cluster-warehouse); }
+    .cluster-payment { background: var(--cluster-payment); }
+    .cluster-support { background: var(--cluster-support); }
+    .cluster-rbac { background: var(--cluster-rbac); }
+
+    .table-columns {
+      max-height: none;
+      overflow: visible;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 2px 0;
+    }
+
+    .table-column-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 88px;
+      align-items: center;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 6px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .table-column-row:hover {
+      background: var(--bg-hover);
+    }
+
+    .table-column-row.highlighted-fk {
+      background: rgba(56, 189, 248, 0.22) !important;
+      border-left: 3px solid #38bdf8 !important;
+      padding-left: 5px;
+    }
+
+    .col-badge-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      min-width: 28px;
+    }
+
+    .col-name-slot {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .col-type-slot {
+      text-align: right;
+      font-size: 9.5px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: ui-monospace, monospace;
+    }
+
+    .badge {
+      font-size: 8.5px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-align: center;
+      min-width: 20px;
+      display: inline-block;
+      line-height: 1.2;
+    }
+
+    .badge-pk { background: rgba(251, 191, 36, 0.2); color: var(--color-pk); border: 1px solid var(--color-pk); }
+    .badge-fk { background: rgba(56, 189, 248, 0.2); color: var(--color-fk); border: 1px solid var(--color-fk); }
+    .badge-uq { background: rgba(192, 132, 252, 0.2); color: var(--color-uq); border: 1px solid var(--color-uq); }
+
+    .col-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      opacity: 0.35;
+      display: inline-block;
+    }
+
+    /* SLIDE-OUT DRAWER PRESENTATION PANEL */
+    .presentation-panel {
+      position: fixed;
+      top: 98px;
+      right: calc(-1 * var(--panel-width) - 20px);
+      width: var(--panel-width);
+      height: calc(100vh - 98px);
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.6);
+      z-index: 950;
+      transition: right 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .presentation-panel.open {
+      right: 0;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-header-badge {
+      font-size: 9.5px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--border-focus);
+      border: 1px solid var(--border-focus);
+    }
+
+    .panel-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .panel-close-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .panel-body::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .script-box {
+      background: var(--bg-card-header);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--border-focus);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .script-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--border-focus);
+      margin-bottom: 6px;
+    }
+
+    .script-box-text {
+      font-size: 12.5px;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .panel-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .panel-section-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* DEV ACTION BUTTONS IN DRAWER */
+    .drawer-dev-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-dev-copy {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .btn-dev-copy:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: #38bdf8;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-primary);
+    }
+
+    .detail-table th, .detail-table td {
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      text-align: left;
+      color: var(--text-primary);
+    }
+
+    .detail-table th {
+      background: var(--bg-card-header);
+      color: var(--text-primary);
+      font-weight: 700;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    
+    .rel-card {
+      background: var(--bg-card-header);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      transition: all 0.15s;
+    }
+    .rel-card:hover {
+      border-color: var(--border-focus);
+    }
+    .rel-card-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+    .rel-card-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    .marker-circ {
+      fill: var(--bg-card);
+    }
+
+    /* DROPDOWN MENU */
+    .dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      width: 210px;
+      padding: 6px 0;
+      z-index: 1200;
+      display: none;
+    }
+
+    .dropdown-menu.open {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-hover);
+      color: #38bdf8;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 4px 0;
+    }
+
+    /* MINIMAP */
+    .minimap-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 160px;
+      height: 110px;
+      background: rgba(13, 20, 36, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      z-index: 800;
+      pointer-events: none;
+    }
+
+    .minimap-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .minimap-lens {
+      position: absolute;
+      border: 1.5px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0284c7;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo"><i class="fa-solid fa-database"></i></div>
+      <div class="brand-title">QueenBeautiful / BeautiQ — Sơ Đồ CSDL ERD</div>
+      <span class="brand-badge" id="lblTotalTablesHeader">79 BẢNG</span>
+    </div>
+
+    <div class="nav-controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Tìm bảng hoặc cột (vd: don_hang, sku, ctv)..." autocomplete="off" />
+        <div id="searchResultsDropdown" class="search-results-dropdown"></div>
+      </div>
+
+      <button class="btn" id="btnResetFocus" onclick="resetFocus()">Bỏ Chọn</button>
+
+      <!-- DROPDOWN XEM THEM -->
+      <div class="dropdown-wrapper">
+        <button class="btn" id="btnMoreActions" onclick="toggleMoreDropdown(event)">
+          <span>Xem Thêm</span>
+        </button>
+        <div id="moreActionsMenu" class="dropdown-menu">
+          <div class="dropdown-item" onclick="exportErdVectorSvg()">
+            Xuất Vector SVG
+          </div>
+          <div class="dropdown-item" onclick="exportErdHighResPng()">
+            Xuất Ảnh PNG Ultra-HD
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" onclick="toggleAppTheme()">
+            Đổi Giao Diện
+          </div>
+          <div class="dropdown-item" onclick="fitTablesToView(DB_SCHEMA.tables, true, 0.45)">
+            Căn Giữa Toàn Cảnh
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+    <!-- SUB NAVBAR (CLUSTER FILTER PILLS) -->
+  <nav class="sub-bar" id="subBarContainer">
+    <span class="sub-bar-title">PHÂN HỆ:</span>
+    <div class="pill-item active" onclick="setCluster('ALL', event)">
+      <span>Tất Cả (79)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('COMMERCE', event)">
+      <span class="pill-dot" style="background: var(--cluster-commerce);"></span>
+      <span>Khách Hàng & Đơn Hàng (12)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('CATALOG', event)">
+      <span class="pill-dot" style="background: var(--cluster-catalog);"></span>
+      <span>Sản Phẩm & Danh Mục (10)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('PROMO', event)">
+      <span class="pill-dot" style="background: var(--cluster-promo);"></span>
+      <span>Khuyến Mãi & Sale (3)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('WAREHOUSE', event)">
+      <span class="pill-dot" style="background: var(--cluster-warehouse);"></span>
+      <span>Kho Hàng & Đổi Trả (13)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('CTV', event)">
+      <span class="pill-dot" style="background: var(--cluster-ctv);"></span>
+      <span>Tiếp Thị CTV & Ví (15)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('PAYMENT', event)">
+      <span class="pill-dot" style="background: var(--cluster-payment);"></span>
+      <span>Thanh Toán QR (3)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('RBAC', event)">
+      <span class="pill-dot" style="background: var(--cluster-rbac);"></span>
+      <span>Phân Quyền RBAC (10)</span>
+    </div>
+    <div class="pill-item" onclick="setCluster('SUPPORT', event)">
+      <span class="pill-dot" style="background: var(--cluster-support);"></span>
+      <span>Hỗ Trợ & Địa Bàn (13)</span>
+    </div>
+  </nav>
+
+  <!-- VIEWPORT -->
+  <main class="viewport-container" id="viewport">
+    <div class="canvas" id="canvas">
+      <svg class="connections-layer" id="relationships">
+        <defs>
+          <!-- 1. PK SIDE: EXACTLY ONE / MANDATORY ONE (||) - WITH LEADER STEM -->
+          <marker id="marker-one-mandatory" viewBox="0 0 20 10" refX="20" refY="5" markerWidth="11" markerHeight="7" orient="auto">
+            <line x1="5.5" y1="1" x2="5.5" y2="9" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" />
+            <line x1="9.5" y1="1" x2="9.5" y2="9" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" />
+            <line x1="9.5" y1="5" x2="20" y2="5" stroke="#38bdf8" stroke-width="1.4" />
+          </marker>
+          <marker id="marker-one-mandatory-active" viewBox="0 0 20 10" refX="20" refY="5" markerWidth="11.5" markerHeight="7.5" orient="auto">
+            <line x1="5.5" y1="1" x2="5.5" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="9.5" y1="1" x2="9.5" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="9.5" y1="5" x2="20" y2="5" stroke="#00f0ff" stroke-width="1.6" />
+          </marker>
+
+          <!-- 2. FK SIDE (1:N NOT NULL): CROW'S FOOT MANDATORY (<|) - WITH LEADER STEM -->
+          <marker id="marker-many-mandatory" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12" markerHeight="7" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#38bdf8" stroke-width="1.4" />
+            <path d="M 7 1.5 L 14 5 L 7 8.5 M 7 5 L 14 5" fill="none" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" />
+            <line x1="16" y1="1" x2="16" y2="9" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" />
+          </marker>
+          <marker id="marker-many-mandatory-active" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12.5" markerHeight="7.5" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#00f0ff" stroke-width="1.6" />
+            <path d="M 7 1.5 L 14 5 L 7 8.5 M 7 5 L 14 5" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="16" y1="1" x2="16" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+          </marker>
+
+          <!-- 3. FK SIDE (1:N NULLABLE): CROW'S FOOT OPTIONAL (<o) - WITH LEADER STEM -->
+          <marker id="marker-many-optional" viewBox="0 0 24 10" refX="0" refY="5" markerWidth="13" markerHeight="7" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#38bdf8" stroke-width="1.4" />
+            <path d="M 7 1.5 L 13 5 L 7 8.5 M 7 5 L 13 5" fill="none" stroke="#38bdf8" stroke-width="1.3" stroke-linecap="round" />
+            <circle cx="17" cy="5" r="2.3" class="marker-circ" stroke="#38bdf8" stroke-width="1.3" />
+          </marker>
+          <marker id="marker-many-optional-active" viewBox="0 0 24 10" refX="0" refY="5" markerWidth="13.5" markerHeight="7.5" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#00f0ff" stroke-width="1.6" />
+            <path d="M 7 1.5 L 13 5 L 7 8.5 M 7 5 L 13 5" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="17" cy="5" r="2.3" class="marker-circ" stroke="#00f0ff" stroke-width="1.5" />
+          </marker>
+
+          <!-- 4. FK SIDE (1:1 UNIQUE NOT NULL): ONE MANDATORY (||) - WITH LEADER STEM -->
+          <marker id="marker-one-unique-mandatory" viewBox="0 0 20 10" refX="0" refY="5" markerWidth="11" markerHeight="7" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#c084fc" stroke-width="1.4" />
+            <line x1="10" y1="1" x2="10" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />
+            <line x1="14" y1="1" x2="14" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />
+          </marker>
+          <marker id="marker-one-unique-mandatory-active" viewBox="0 0 20 10" refX="0" refY="5" markerWidth="11.5" markerHeight="7.5" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#00f0ff" stroke-width="1.6" />
+            <line x1="10" y1="1" x2="10" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="14" y1="1" x2="14" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+          </marker>
+
+          <!-- 5. FK SIDE (1:1 UNIQUE NULLABLE): ONE OPTIONAL (o|) - WITH LEADER STEM -->
+          <marker id="marker-one-unique-optional" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12" markerHeight="7" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#c084fc" stroke-width="1.4" />
+            <line x1="10" y1="1" x2="10" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />
+            <circle cx="15.5" cy="5" r="2.3" class="marker-circ" stroke="#c084fc" stroke-width="1.3" />
+          </marker>
+          <marker id="marker-one-unique-optional-active" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12.5" markerHeight="7.5" orient="auto">
+            <line x1="0" y1="5" x2="7" y2="5" stroke="#00f0ff" stroke-width="1.6" />
+            <line x1="10" y1="1" x2="10" y2="9" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="15.5" cy="5" r="2.3" class="marker-circ" stroke="#00f0ff" stroke-width="1.5" />
+          </marker>
+        </defs>
+        <g id="pathsLayer"></g>
+      </svg>
+      <div id="tablesContainer"></div>
+    </div>
+  </main>
+
+  <!-- SLIDE-OUT DRAWER PANEL -->
+  <aside class="presentation-panel" id="drawer">
+    <div class="panel-header">
+      <div>
+        <div id="drawerCategoryBadge" class="panel-header-badge">CSDL</div>
+        <div id="drawerTableName" style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">TÊN BẢNG</div>
+      </div>
+      <button class="panel-close-btn" onclick="resetFocus()">&times;</button>
+    </div>
+    <div class="panel-body" id="drawerContent"></div>
+  </aside>
+
+  <!-- MINIMAP -->
+  <div class="minimap-container">
+    <canvas id="minimap" class="minimap-canvas"></canvas>
+    <div id="minimapLens" class="minimap-lens"></div>
+  </div>
+
+  <!-- TOAST MESSAGE -->
+  <div id="toastMessage" class="toast-msg"></div>
+
+  <script>
+    const DB_SCHEMA = {
+  "tables": [
+    {
+      "name": "ANH_SAN_PHAM",
+      "cluster": "CATALOG",
+      "x": 1980,
+      "y": 496,
+      "desc": "Bộ sưu tập hình ảnh sản phẩm chất lượng cao, quản lý ảnh đại diện chính (LaAnhChinh=1), ảnh swatch màu son/kem và ảnh góc chụp chi tiết hiển thị trong trang mô tả.",
+      "columns": [
+        {
+          "name": "AnhID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "DuongDanAnh",
+          "type": "VARCHAR(1000)"
+        },
+        {
+          "name": "ThuTu",
+          "type": "INT",
+          "default": "1"
+        },
+        {
+          "name": "LaAnhChinh",
+          "type": "BIT",
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "BANG_CHUNG_DOI_SOAT_RUT_TIEN",
+      "cluster": "CTV",
+      "x": 4500,
+      "y": 1550,
+      "desc": "Lưu trữ hình ảnh biên lai ủy nhiệm chi ngân hàng, mã tham chiếu giao dịch và ảnh chụp màn hình chứng từ chuyển tiền cho CTV khi duyệt rút tiền.",
+      "columns": [
+        {
+          "name": "BangChungDoiSoatID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "RutTienID",
+          "type": "INT",
+          "fk": "YEU_CAU_RUT_TIEN.RutTienID",
+          "notNull": true
+        },
+        {
+          "name": "DoiSoatRutTienID",
+          "type": "BIGINT",
+          "fk": "DOI_SOAT_RUT_TIEN_CTV.DoiSoatRutTienID"
+        },
+        {
+          "name": "TenTepGoc",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "TenTepLuuTru",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "LoaiMime",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KichThuoc",
+          "type": "BIGINT",
+          "notNull": true
+        },
+        {
+          "name": "MaBamSha256",
+          "type": "CHAR(64)",
+          "notNull": true
+        },
+        {
+          "name": "NguoiTaiLenID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "NgayTaiLen",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "BIEN_DONG_KHO",
+      "cluster": "WAREHOUSE",
+      "x": 1180,
+      "y": 1550,
+      "desc": "Thẻ kho kế toán bất biến (Immutable Stock Ledger) chuẩn kế toán Append-Only. Ghi nhận chi tiết mọi biến động tồn thực tế (TonThucTeTruoc/Sau) và tồn giữ chỗ (TonGiuChoTruoc/Sau) kèm Khóa Idempotency chống nhân đôi tồn kho khi gọi API đồng thời.",
+      "columns": [
+        {
+          "name": "BienDongKhoID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID",
+          "notNull": true
+        },
+        {
+          "name": "LoaiBienDong",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongThucTeThayDoi",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongGiuChoThayDoi",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TonThucTeTruoc",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TonThucTeSau",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TonGiuChoTruoc",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TonGiuChoSau",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "LoaiThamChieu",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "ThamChieuID",
+          "type": "VARCHAR(120)",
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "PhienThanhToanID",
+          "type": "BIGINT",
+          "fk": "PHIEN_THANH_TOAN_QR.PhienThanhToanID"
+        },
+        {
+          "name": "DoiTraID",
+          "type": "INT",
+          "fk": "YEU_CAU_DOI_TRA.DoiTraID"
+        },
+        {
+          "name": "NhanVienThucHienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NguonThucHien",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "MaLienKet",
+          "type": "VARCHAR(64)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "BIEN_THE_SAN_PHAM",
+      "cluster": "CATALOG",
+      "x": 2340,
+      "y": 100,
+      "desc": "Đơn vị phân loại tồn kho thực tế (Stock Keeping Unit - SKU). Quản lý phân loại Màu sắc, Dung tích (ml/g), giá bán lẻ, số lượng tồn thực tế (SoLuongTon) và số lượng giữ chỗ (SoLuongGiuCho) giúp chống bán vượt tồn kho (Overselling).",
+      "columns": [
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "SKU",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "TenBienThe",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "MauSac",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KichThuoc",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "GiaBan",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongTon",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "PhienBan",
+          "type": "BIGINT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "SoLuongGiuCho",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "MaMau",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "MauHienThi",
+          "type": "VARCHAR(7)"
+        },
+        {
+          "name": "ThuocTinhJson",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "KhoaThuocTinh",
+          "type": "CHAR(64)",
+          "notNull": true
+        },
+        {
+          "name": "AnhBienTheID",
+          "type": "INT",
+          "fk": "ANH_SAN_PHAM.AnhID"
+        },
+        {
+          "name": "DuongDanAnhBienThe",
+          "type": "NVARCHAR(1000)"
+        }
+      ]
+    },
+    {
+      "name": "BUT_TOAN_HOA_HONG_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 3420,
+      "y": 2450,
+      "desc": "Audit trail ghi nhận lịch sử chuyển trạng thái từng khoản hoa hồng (PENDING sang AVAILABLE hoặc sang CANCELED khi khách hủy/đổi trả).",
+      "columns": [
+        {
+          "name": "ButToanHoaHongCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "HoaHongCongTacVienID",
+          "type": "BIGINT",
+          "fk": "HOA_HONG_CONG_TAC_VIEN.HoaHongCongTacVienID",
+          "notNull": true
+        },
+        {
+          "name": "ButToanGocID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_HOA_HONG_CONG_TAC_VIEN.ButToanHoaHongCongTacVienID"
+        },
+        {
+          "name": "LoaiButToan",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "SoTien",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "TrangThaiTruoc",
+          "type": "VARCHAR(30)"
+        },
+        {
+          "name": "TrangThaiSau",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NgayGhiNhan",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "BUT_TOAN_VI_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 3780,
+      "y": 1974,
+      "desc": "Sổ nhật ký bút toán kép ghi nhận mọi giao dịch tăng/giảm số dư ví CTV (Cộng tạm giữ, Mở khóa khả dụng, Khấu trừ rút tiền) kèm SoDuTruoc/Sau và IdempotencyKey chống trùng lặp.",
+      "columns": [
+        {
+          "name": "ButToanViCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "ViCongTacVienID",
+          "type": "BIGINT",
+          "fk": "VI_CONG_TAC_VIEN.ViCongTacVienID",
+          "notNull": true
+        },
+        {
+          "name": "HoaHongCongTacVienID",
+          "type": "BIGINT",
+          "fk": "HOA_HONG_CONG_TAC_VIEN.HoaHongCongTacVienID"
+        },
+        {
+          "name": "RutTienID",
+          "type": "INT",
+          "fk": "YEU_CAU_RUT_TIEN.RutTienID"
+        },
+        {
+          "name": "ButToanGocID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "LoaiButToan",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "ThayDoiChoDuyet",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "ThayDoiKhaDung",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "ThayDoiTamGiu",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "ThayDoiTongDaChi",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "ThayDoiCongNo",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "SoDuChoDuyetSau",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoDuKhaDungSau",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoDuTamGiuSau",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TongDaChiSau",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "CongNoSau",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NguoiThucHienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayGhiNhan",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "CAU_HINH_HE_THONG",
+      "cluster": "SUPPORT",
+      "x": 5380,
+      "y": 356,
+      "desc": "Bảng tham số cấu hình động toàn hệ thống: Tỷ lệ hoa hồng CTV mặc định %, Thời gian đổi trả 7 ngày, Thời gian lưu Cookie 30 ngày, Phí vận chuyển mặc định, SMTP Email.",
+      "columns": [
+        {
+          "name": "CauHinhID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaCauHinh",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "TenHienThi",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "GiaTri",
+          "type": "NVARCHAR(MAX)",
+          "notNull": true
+        },
+        {
+          "name": "KieuDuLieu",
+          "type": "VARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "NhomCauHinh",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(500)"
+        }
+      ]
+    },
+    {
+      "name": "CAU_HINH_LOAI_THONG_BAO_NHAN_VIEN",
+      "cluster": "RBAC",
+      "x": 5300,
+      "y": 1974,
+      "desc": "Bảng ma trận cấu hình nhận thông báo theo từng loại sự kiện nghiệp vụ (Đơn hàng mới, Phiếu nhập chờ duyệt, Phiếu xuất, Yêu cầu đổi trả, Ticket hỗ trợ) cho từng nhân viên.",
+      "columns": [
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "pk": true,
+          "fk": "CAU_HINH_THONG_BAO_NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "LoaiSuKien",
+          "type": "VARCHAR(50)",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "HienThiThongBao",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "DocThanhTieng",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "CAU_HINH_THONG_BAO_NHAN_VIEN",
+      "cluster": "RBAC",
+      "x": 5300,
+      "y": 1550,
+      "desc": "Cấu hình âm thanh chuông báo và giọng đọc trợ lý Realtime cá nhân hóa cho từng tài khoản nhân viên quản trị (Bật/tắt giọng đọc, âm lượng âm báo chime, chọn giọng đọc Web Speech TTS).",
+      "columns": [
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "pk": true,
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "BatThongBaoRealtime",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "BatDocThanhTieng",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "BatThongBaoTrinhDuyet",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "AmLuong",
+          "type": "TINYINT",
+          "notNull": true,
+          "default": "80"
+        },
+        {
+          "name": "TocDoDoc",
+          "type": "DECIMAL(3,2)",
+          "notNull": true,
+          "default": "1.00"
+        },
+        {
+          "name": "GioImLangBatDau",
+          "type": "TIME"
+        },
+        {
+          "name": "GioImLangKetThuc",
+          "type": "TIME"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "MaGiongDoc",
+          "type": "NVARCHAR(255)"
+        }
+      ]
+    },
+    {
+      "name": "CHINH_SACH_HOA_HONG",
+      "cluster": "CTV",
+      "x": 3060,
+      "y": 1550,
+      "desc": "Chính sách hoa hồng tiếp thị theo cấp bậc CTV (Tân binh, Bạc, Vàng, Kim Cương), quy định tỷ lệ hoa hồng mặc định % và thời điểm hiệu lực chính sách.",
+      "columns": [
+        {
+          "name": "ChinhSachHoaHongID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaChinhSach",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "TenChinhSach",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "CapApDung",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "CtvID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "MaChienDich",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "MucUuTien",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(20)",
+          "notNull": true,
+          "default": "ACTIVE"
+        },
+        {
+          "name": "NgayBatDau",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayKetThuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "Nguon",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_DON_HANG",
+      "cluster": "COMMERCE",
+      "x": 460,
+      "y": 944,
+      "desc": "Snapshot bất biến (Immutable Snapshot) của từng mặt hàng tại thời điểm mua: chốt cố định Tên sản phẩm, Mã SKU, Đơn giá thực tế đã trừ Flash Sale/Voucher; bảo vệ tính toàn vẹn doanh thu khi giá gốc trong Catalog thay đổi.",
+      "columns": [
+        {
+          "name": "ChiTietDonHangID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "DonGia",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID"
+        },
+        {
+          "name": "TenSanPhamSnapshot",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "TenBienTheSnapshot",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "MauSacSnapshot",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "KichThuocSnapshot",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "SKUSnapshot",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "MaMauSnapshot",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "MauHienThiSnapshot",
+          "type": "VARCHAR(7)"
+        },
+        {
+          "name": "ThuocTinhSnapshot",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_GIO_HANG",
+      "cluster": "COMMERCE",
+      "x": 820,
+      "y": 328,
+      "desc": "Danh sách các biến thể sản phẩm (SKU) đang được lưu trong giỏ hàng thành viên, số lượng chọn mua và thời điểm cập nhật, hỗ trợ kiểm tra tồn kho tức thì trước khi chuyển sang bước Checkout.",
+      "columns": [
+        {
+          "name": "ChiTietID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "GioHangID",
+          "type": "INT",
+          "fk": "GIO_HANG.GioHangID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "NgayThemVao",
+          "type": "DATETIME",
+          "default": "(getdate("
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID",
+          "uq": true,
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_PHIEN_THANH_TOAN_QR",
+      "cluster": "PAYMENT",
+      "x": 3880,
+      "y": 100,
+      "desc": "Snapshot danh sách sản phẩm và số lượng đang được giữ chỗ tồn kho trong phiên thanh toán QR, tự động giải phóng tồn giữ chỗ nếu phiên hết hạn.",
+      "columns": [
+        {
+          "name": "ChiTietPhienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "PhienThanhToanID",
+          "type": "BIGINT",
+          "fk": "PHIEN_THANH_TOAN_QR.PhienThanhToanID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "DonGia",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TenSanPhamSnapshot",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "TenBienTheSnapshot",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "MauSacSnapshot",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KichThuocSnapshot",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "SKUSnapshot",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "MaMauSnapshot",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "MauHienThiSnapshot",
+          "type": "VARCHAR(7)"
+        },
+        {
+          "name": "ThuocTinhSnapshot",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_PHIEU_NHAP",
+      "cluster": "WAREHOUSE",
+      "x": 460,
+      "y": 2114,
+      "desc": "Chi tiết danh sách các biến thể SKU nhập kho, số lượng thực nhập và giá vốn nhập hàng, tự động kích hoạt cộng dồn tồn kho thực tế trong thẻ kho BIEN_DONG_KHO.",
+      "columns": [
+        {
+          "name": "ChiTietPhieuNhapID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "PhieuNhapID",
+          "type": "INT",
+          "fk": "PHIEU_NHAP_KHO.PhieuNhapID"
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "GiaNhap",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID"
+        },
+        {
+          "name": "ThanhTien",
+          "type": "DECIMAL(18,2)"
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_PHIEU_XUAT",
+      "cluster": "WAREHOUSE",
+      "x": 820,
+      "y": 2030,
+      "desc": "Chi tiết danh sách các SKU và số lượng xuất ra khỏi kho theo từng phiếu xuất nội bộ.",
+      "columns": [
+        {
+          "name": "ChiTietPhieuXuatID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "PhieuXuatID",
+          "type": "INT",
+          "fk": "PHIEU_XUAT_KHO.PhieuXuatID"
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID"
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_PHIEU_XU_LY_HANG_HOAN",
+      "cluster": "WAREHOUSE",
+      "x": 1900,
+      "y": 2114,
+      "desc": "Chi tiết kiểm định từng món hàng hoàn: phân loại hàng nguyên vẹn (nhập lại kho bán) hoặc hàng hỏng/đã bóc tem (chuyển sang kho hàng lỗi HANG_LOI).",
+      "columns": [
+        {
+          "name": "ChiTietHangHoanID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "PhieuHangHoanID",
+          "type": "BIGINT",
+          "fk": "PHIEU_XU_LY_HANG_HOAN.PhieuHangHoanID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "ChiTietDonHangID",
+          "type": "INT",
+          "fk": "CHI_TIET_DON_HANG.ChiTietDonHangID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongDuKien",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongThucNhan",
+          "type": "INT"
+        },
+        {
+          "name": "SoLuongNhapLai",
+          "type": "INT"
+        },
+        {
+          "name": "SoLuongHong",
+          "type": "INT"
+        },
+        {
+          "name": "LyDoHangHong",
+          "type": "NVARCHAR(500)"
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_SALE",
+      "cluster": "PROMO",
+      "x": 3140,
+      "y": 892,
+      "desc": "Cấu hình chi tiết mức giảm giá (% hoặc số tiền trừ thẳng) cho từng SKU hoặc toàn bộ sản phẩm trong sự kiện Sale; hệ thống tự động tính toán giá ưu đãi hiển thị trên UI.",
+      "columns": [
+        {
+          "name": "ChiTietSaleID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "ChuongTrinhSaleID",
+          "type": "INT",
+          "fk": "CHUONG_TRINH_SALE.ChuongTrinhSaleID",
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID"
+        },
+        {
+          "name": "LoaiGiamGia",
+          "type": "NVARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "GiaTriGiam",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysdatetime("
+        }
+      ]
+    },
+    {
+      "name": "CHI_TIET_YEU_CAU_DOI_TRA",
+      "cluster": "WAREHOUSE",
+      "x": 1540,
+      "y": 2002,
+      "desc": "Danh sách chi tiết từng SKU và số lượng sản phẩm khách hàng gửi yêu cầu trả hàng, làm căn cứ đối chiếu khi kho hàng lập phiếu kiểm định vật lý.",
+      "columns": [
+        {
+          "name": "ChiTietYeuCauDoiTraID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DoiTraID",
+          "type": "INT",
+          "fk": "YEU_CAU_DOI_TRA.DoiTraID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "ChiTietDonHangID",
+          "type": "INT",
+          "fk": "CHI_TIET_DON_HANG.ChiTietDonHangID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SoLuongYeuCau",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongDuyet",
+          "type": "INT"
+        },
+        {
+          "name": "DonGiaSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TienHoanSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "CHUONG_TRINH_SALE",
+      "cluster": "PROMO",
+      "x": 3140,
+      "y": 496,
+      "desc": "Quản lý chiến dịch Flash Sale V57 theo thời gian thực (Real-time Sale Engine). Quản lý khung giờ vàng (GioBatDau - GioKetThuc), mức độ ưu tiên áp dụng (UuTien) và trạng thái kích hoạt chiến dịch.",
+      "columns": [
+        {
+          "name": "ChuongTrinhSaleID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenChuongTrinh",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "ThoiGianBatDau",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "ThoiGianKetThuc",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(50)",
+          "notNull": true,
+          "default": "SCHEDULED"
+        },
+        {
+          "name": "UuTien",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "KichHoat",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysdatetime("
+        }
+      ]
+    },
+    {
+      "name": "CONG_DUNG",
+      "cluster": "CATALOG",
+      "x": 2700,
+      "y": 328,
+      "desc": "Từ điển các công dụng trị liệu mỹ phẩm (Dưỡng ẩm sâu, Kiềm dầu trị mụn, Chống lão hóa, Làm sáng mờ thâm, Phục hồi màng da...) phục vụ bộ lọc tìm kiếm thông minh theo nhu cầu da.",
+      "columns": [
+        {
+          "name": "CongDungID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenCongDung",
+          "type": "NVARCHAR(255)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT",
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 2340,
+      "y": 1550,
+      "desc": "Hồ sơ đối tác tiếp thị liên kết (Affiliate CTV): mã giới thiệu duy nhất (MaGioiThieu), email, mật khẩu BCrypt, quy trình duyệt hồ sơ (CHO_DUYET -> DA_DUYET) và trạng thái hoạt động.",
+      "columns": [
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "HoTen",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "Sdt",
+          "type": "VARCHAR(20)"
+        },
+        {
+          "name": "Email",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "MatKhau",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "LinkMXH",
+          "type": "VARCHAR(500)"
+        },
+        {
+          "name": "SoTaiKhoan",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "NganHang",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "MaGioiThieu",
+          "type": "VARCHAR(50)",
+          "uq": true
+        },
+        {
+          "name": "SoDuVi",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TongDoanhThu",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TrangThaiPheDuyet",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "SoLuotClick",
+          "type": "INT",
+          "default": "0"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "default": "(getdate("
+        },
+        {
+          "name": "NgayDuyet",
+          "type": "DATETIME"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "TrangThaiTaiKhoan",
+          "type": "VARCHAR(30)",
+          "notNull": true,
+          "default": "ACTIVE"
+        },
+        {
+          "name": "NgayKhoa",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "KhoaBoiNhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "MaLyDoKhoa",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "LyDoKhoa",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "MoKhoaLuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "MaGioiThieuChuanHoa",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "NguoiXuLyPheDuyetID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "LyDoPheDuyet",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NgayXuLyPheDuyet",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "PhienBanPheDuyet",
+          "type": "TIMESTAMP",
+          "notNull": true
+        },
+        {
+          "name": "MaTraCuuTrangThai",
+          "type": "VARCHAR(64)",
+          "notNull": true
+        },
+        {
+          "name": "LyDoThamGia",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "DaChapNhanDieuKhoan",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "NgayChapNhanDieuKhoan",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayNgungHoatDong",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "LyDoNgungHoatDong",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NgungBoiNhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "PhienBanDieuKhoan",
+          "type": "VARCHAR(50)"
+        }
+      ]
+    },
+    {
+      "name": "DANG_KY_HANG_VE",
+      "cluster": "CATALOG",
+      "x": 1620,
+      "y": 612,
+      "desc": "Đăng ký nhận thông báo khi biến thể SKU hết hàng (Out-of-stock) được nhập kho trở lại. Hệ thống tự động kích hoạt gửi Email thông báo khi có phiếu nhập kho mới.",
+      "columns": [
+        {
+          "name": "ID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "NgayDangKy",
+          "type": "DATETIME"
+        },
+        {
+          "name": "DaThongBao",
+          "type": "BIT",
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "DANH_MUC",
+      "cluster": "CATALOG",
+      "x": 1620,
+      "y": 100,
+      "desc": "Cấu trúc cây danh mục đa cấp (Self-Referencing Parent-Child Tree qua DanhMucChaID). Quản lý danh mục cha-con mỹ phẩm (Chăm sóc da, Trang điểm, Chăm sóc tóc...) kèm Slug SEO và cờ hiển thị.",
+      "columns": [
+        {
+          "name": "DanhMucID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenDanhMuc",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "Slug",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "HienThiTrangChu",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "HienThiMenu",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "DIA_CHI_KHACH_HANG",
+      "cluster": "COMMERCE",
+      "x": 100,
+      "y": 580,
+      "desc": "Sổ địa chỉ nhận hàng của khách hàng. Liên kết phân cấp hành chính 3 cấp (Tỉnh/Huyện/Xã) chuẩn hóa quốc gia, hỗ trợ gắn cờ địa chỉ mặc định (MacDinh=1) giúp rút ngắn luồng Checkout 1 chạm.",
+      "columns": [
+        {
+          "name": "DiaChiID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "TenNguoiNhan",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "SdtNguoiNhan",
+          "type": "VARCHAR(20)"
+        },
+        {
+          "name": "DiaChiChiTiet",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "TinhThanh",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "QuanHuyen",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "PhuongXa",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "MacDinh",
+          "type": "BIT"
+        }
+      ]
+    },
+    {
+      "name": "DOI_SOAT_RUT_TIEN_CTV",
+      "cluster": "CTV",
+      "x": 4140,
+      "y": 2170,
+      "desc": "Hồ sơ đối soát kiểm soát kép Maker - Checker: Nhân viên kế toán lập lệnh chi (NguoiLapID) và Quản lý tài chính phê duyệt chuyển khoản (NguoiDuyetID) đảm bảo an toàn quỹ.",
+      "columns": [
+        {
+          "name": "DoiSoatRutTienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "RutTienID",
+          "type": "INT",
+          "fk": "YEU_CAU_RUT_TIEN.RutTienID",
+          "notNull": true
+        },
+        {
+          "name": "KetQuaDoiSoat",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThaiDoiSoat",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "MaThamChieuGiaoDich",
+          "type": "VARCHAR(120)"
+        },
+        {
+          "name": "ThoiGianChuyenTienThucTe",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "ButToanGiuID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "NguoiDoiSoatID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "NgayDoiSoat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NguoiXacNhanID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayXacNhan",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "LyDoTuChoiDoiSoat",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "KhoaIdempotencyDoiSoat",
+          "type": "VARCHAR(180)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotencyXacNhan",
+          "type": "VARCHAR(180)"
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "DON_HANG",
+      "cluster": "COMMERCE",
+      "x": 460,
+      "y": 100,
+      "desc": "Hợp đồng thương mại điện tử chính thức. Quản lý trạng thái vòng đời (CHO_XAC_NHAN -> DA_XAC_NHAN -> DANG_GIAO -> DA_GIAO -> HOAN_TAT / DA_HUY), mã đơn độc nhất MDH-xxx, tổng thanh toán, phương thức COD/PayOS, áp Voucher và gắn Attribution CTV.",
+      "columns": [
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaDonHang",
+          "type": "VARCHAR(100)",
+          "uq": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "VoucherID",
+          "type": "INT",
+          "fk": "MA_KHUYEN_MAI.VoucherID"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TongTien",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TienHoaHong",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "PhuongThucThanhToan",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "TrangThaiDon",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "DiaChiGiaoHang",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "LinkQrThanhToan",
+          "type": "VARCHAR(500)"
+        },
+        {
+          "name": "LyDoHuy",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "HoiThoaiBiKhoa",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "MaLyDoKhoaHoiThoai",
+          "type": "VARCHAR(40)"
+        },
+        {
+          "name": "LyDoKhoaHoiThoai",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "KhoaHoiThoaiBoiNhanVienID",
+          "type": "INT"
+        },
+        {
+          "name": "KhoaHoiThoaiBoiTaiKhoan",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "KhoaHoiThoaiLuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "PhienGhiNhanCongTacVienID",
+          "type": "BIGINT",
+          "fk": "PHIEN_GHI_NHAN_CONG_TAC_VIEN.PhienGhiNhanCongTacVienID"
+        },
+        {
+          "name": "NgayGiaoThanhCong",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "MaCtvSnapshot",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "TenCtvSnapshot",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "NguonGioiThieuSnapshot",
+          "type": "VARCHAR(30)"
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(200)"
+        }
+      ]
+    },
+    {
+      "name": "GHI_CHU_HOI_THOAI",
+      "cluster": "SUPPORT",
+      "x": 4660,
+      "y": 892,
+      "desc": "Ghi chú bảo mật nội bộ của nhân viên chăm sóc khách hàng về tình trạng đặc biệt của đơn hàng hoặc lưu ý giao hàng cho shipper.",
+      "columns": [
+        {
+          "name": "GhiChuID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "LoaiHoiThoai",
+          "type": "VARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "YeuCauHoTroID",
+          "type": "INT",
+          "fk": "YEU_CAU_HO_TRO.YeuCauID"
+        },
+        {
+          "name": "MaTag",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "NoiDungTuNhap",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "default": "(getdate("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME",
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "GIO_HANG",
+      "cluster": "COMMERCE",
+      "x": 820,
+      "y": 100,
+      "desc": "Giỏ hàng lưu trữ Database theo kiến trúc Hybrid: Khách vãng lai lưu giỏ trên LocalStorage; ngay khi đăng nhập, hệ thống tự động đồng bộ (Merge Cart) vào Database theo KhachHangID duy nhất.",
+      "columns": [
+        {
+          "name": "GioHangID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "default": "(getdate("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME",
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "HANG_LOI",
+      "cluster": "WAREHOUSE",
+      "x": 100,
+      "y": 1978,
+      "desc": "Kho lưu trữ hàng hỏng, vỡ, hết hạn sử dụng hoặc sản phẩm lỗi do vận chuyển/hoàn trả; làm căn cứ lập biên bản tiêu hủy hoặc yêu cầu nhà cung cấp đền bù.",
+      "columns": [
+        {
+          "name": "HangLoiID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "PhanLoai",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "DeXuatXuLy",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "NgayBaoCao",
+          "type": "DATETIME"
+        },
+        {
+          "name": "BienTheID",
+          "type": "INT",
+          "fk": "BIEN_THE_SAN_PHAM.BienTheID"
+        },
+        {
+          "name": "ChiTietHangHoanID",
+          "type": "BIGINT",
+          "fk": "CHI_TIET_PHIEU_XU_LY_HANG_HOAN.ChiTietHangHoanID"
+        }
+      ]
+    },
+    {
+      "name": "HOA_HONG_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 3420,
+      "y": 1550,
+      "desc": "Khoản hoa hồng phát sinh theo từng đơn hàng. Quản lý vòng đời trạng thái: PENDING (tạm giữ) -> AVAILABLE (khả dụng sau 7 ngày giao hàng thành công) -> PAID (đã chi trả).",
+      "columns": [
+        {
+          "name": "HoaHongCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID",
+          "notNull": true
+        },
+        {
+          "name": "ChiTietDonHangID",
+          "type": "INT",
+          "fk": "CHI_TIET_DON_HANG.ChiTietDonHangID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "CtvID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID",
+          "notNull": true
+        },
+        {
+          "name": "PhienGhiNhanCongTacVienID",
+          "type": "BIGINT",
+          "fk": "PHIEN_GHI_NHAN_CONG_TAC_VIEN.PhienGhiNhanCongTacVienID"
+        },
+        {
+          "name": "ChinhSachHoaHongID",
+          "type": "BIGINT",
+          "fk": "CHINH_SACH_HOA_HONG.ChinhSachHoaHongID",
+          "notNull": true
+        },
+        {
+          "name": "QuyTacHoaHongID",
+          "type": "BIGINT",
+          "fk": "QUY_TAC_HOA_HONG.QuyTacHoaHongID",
+          "notNull": true
+        },
+        {
+          "name": "MaChinhSachSnapshot",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "TenChinhSachSnapshot",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "CapApDungSnapshot",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "LoaiQuyTacSnapshot",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "SoTienCoDinhSnapshot",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TyLePhanTramSnapshot",
+          "type": "DECIMAL(9,4)"
+        },
+        {
+          "name": "SoLuongSnapshot",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "GiaTriGopDongSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "GiamGiaPhanBoSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "CoSoTinhHoaHongSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TienHoaHongSnapshot",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoLuongDaDaoNguoc",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TienDaDaoNguoc",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "Nguon",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(150)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "DuLieuChinhSachSnapshot",
+          "type": "NVARCHAR(MAX)",
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayKhaDung",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "KHACH_HANG",
+      "cluster": "COMMERCE",
+      "x": 100,
+      "y": 100,
+      "desc": "Tài khoản khách hàng trung tâm. Quản lý thông tin định danh, mật khẩu mã hóa BCrypt, đăng nhập đa kênh (Google OAuth2 / Email OTP), số dư ví mua sắm (SoDuVi) phục vụ hoàn tiền tức thì và kiểm soát trạng thái khóa tài khoản.",
+      "columns": [
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaKhachHang",
+          "type": "VARCHAR(100)",
+          "uq": true
+        },
+        {
+          "name": "HoTen",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "Sdt",
+          "type": "VARCHAR(20)"
+        },
+        {
+          "name": "Email",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "GoogleID",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "MatKhau",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT",
+          "default": "1"
+        },
+        {
+          "name": "LoaiKhach",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "SoDuVi",
+          "type": "DECIMAL(18,2)",
+          "default": "0"
+        },
+        {
+          "name": "SoLuotClick",
+          "type": "INT",
+          "default": "0"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "KHO_TON_KHO",
+      "cluster": "WAREHOUSE",
+      "x": 100,
+      "y": 1778,
+      "desc": "Bảng tổng hợp tồn kho theo sản phẩm cha (tương thích nghiệp vụ tổng quan), thống kê tổng số lượng nhập, xuất và tồn thực tế trên toàn hệ thống kho.",
+      "columns": [
+        {
+          "name": "KhoID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "uq": true
+        },
+        {
+          "name": "SoLuongTon",
+          "type": "INT"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_GUI_MAIL",
+      "cluster": "SUPPORT",
+      "x": 5380,
+      "y": 100,
+      "desc": "Nhật ký gửi Email tự động qua SMTP: lưu trữ Email người nhận, Tiêu đề, Mã OTP, Hóa đơn đơn hàng điện tử và trạng thái gửi thành công/thất bại.",
+      "columns": [
+        {
+          "name": "MailID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "EmailNguoiNhan",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "TieuDe",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "NgayGui",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(50)"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_KHOA_CTV",
+      "cluster": "CTV",
+      "x": 2340,
+      "y": 2646,
+      "desc": "Audit log lịch sử khóa hoặc mở khóa tài khoản Cộng tác viên khi vi phạm chính sách tiếp thị, gian lận hoa hồng hoặc theo yêu cầu nội bộ.",
+      "columns": [
+        {
+          "name": "LichSuKhoaID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NguoiThucHienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "NguoiThucHienTen",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "VaiTroThucHien",
+          "type": "VARCHAR(80)",
+          "notNull": true
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID",
+          "notNull": true
+        },
+        {
+          "name": "TenCTV",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "EmailCTV",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "HanhDong",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThaiTruoc",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThaiSau",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "MaLyDo",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "CorrelationID",
+          "type": "VARCHAR(80)"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_TIM_KIEM",
+      "cluster": "COMMERCE",
+      "x": 1180,
+      "y": 468,
+      "desc": "Lịch sử các từ khóa tìm kiếm gần đây của khách hàng, phục vụ tính năng gợi ý tìm kiếm nhanh (Search Autocomplete) và phân tích xu hướng mua sắm thịnh hành (Trending Keywords).",
+      "columns": [
+        {
+          "name": "LichSuTimKiemID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "TuKhoa",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "ThoiGianTimKiem",
+          "type": "DATETIME",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_VI_CTV",
+      "cluster": "CTV",
+      "x": 3780,
+      "y": 2650,
+      "desc": "Sao kê chi tiết mọi biến động số dư ví của Cộng tác viên: cộng hoa hồng đơn hàng thành công, trừ tiền khi hoàn tất lệnh rút tiền về ngân hàng.",
+      "columns": [
+        {
+          "name": "LichSuViID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "LoaiGiaoDich",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "SoTien",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME"
+        },
+        {
+          "name": "MaGiaoDich",
+          "type": "VARCHAR(100)"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_VI_KH",
+      "cluster": "COMMERCE",
+      "x": 1180,
+      "y": 100,
+      "desc": "Sổ cái nhật ký biến động số dư ví khách hàng (Audit Ledger). Ghi nhận minh bạch mọi luồng Nạp tiền, Thanh toán trừ tiền đơn hàng, Hoàn tiền hủy đơn và Hoàn tiền đổi trả hàng 7 ngày với mã giao dịch duy nhất.",
+      "columns": [
+        {
+          "name": "LichSuViKHID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "LoaiGiaoDich",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "SoTien",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME"
+        },
+        {
+          "name": "MaGiaoDich",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(50)"
+        }
+      ]
+    },
+    {
+      "name": "LICH_SU_XEM_SAN_PHAM",
+      "cluster": "COMMERCE",
+      "x": 1180,
+      "y": 724,
+      "desc": "Nhật ký xem chi tiết sản phẩm gần đây của khách hàng (Browsing History), hiển thị mục 'Sản phẩm bạn vừa xem' giúp tăng tỷ lệ quay lại đặt hàng.",
+      "columns": [
+        {
+          "name": "XemID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "IpAddress",
+          "type": "VARCHAR(50)"
+        },
+        {
+          "name": "UserAgent",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME",
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "LUOT_GIOI_THIEU_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 2700,
+      "y": 1550,
+      "desc": "Nhật ký lưu trữ lượt khách hàng click vào link affiliate của CTV hoặc nhập mã giới thiệu khi đăng ký tài khoản / mua hàng.",
+      "columns": [
+        {
+          "name": "LuotGioiThieuCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "CtvID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID",
+          "notNull": true
+        },
+        {
+          "name": "MaGioiThieuSnapshot",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "DuongDanDich",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "HashDiaChiIp",
+          "type": "BINARY"
+        },
+        {
+          "name": "HashThietBi",
+          "type": "BINARY"
+        },
+        {
+          "name": "KetQua",
+          "type": "VARCHAR(30)",
+          "notNull": true,
+          "default": "HOP_LE"
+        },
+        {
+          "name": "NgayGhiNhan",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "MA_KHUYEN_MAI",
+      "cluster": "PROMO",
+      "x": 3140,
+      "y": 100,
+      "desc": "Quản lý mã giảm giá (Voucher Coupon): mã code độc nhất, loại giảm giá (% hoặc tiền), giá trị đơn hàng tối thiểu, số lượng phát hành và kiểm soát hạn sử dụng khi Checkout.",
+      "columns": [
+        {
+          "name": "VoucherID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaCode",
+          "type": "VARCHAR(50)",
+          "uq": true
+        },
+        {
+          "name": "LoaiGiam",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "GiaTriGiam",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "GiaTriToiDa",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "DieuKienDonToiThieu",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "NgayBatDau",
+          "type": "DATETIME"
+        },
+        {
+          "name": "NgayKetThuc",
+          "type": "DATETIME"
+        },
+        {
+          "name": "SoLuong",
+          "type": "INT"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        }
+      ]
+    },
+    {
+      "name": "NHAN_VIEN",
+      "cluster": "RBAC",
+      "x": 4940,
+      "y": 1550,
+      "desc": "Tài khoản nhân viên quản trị và vận hành nội bộ hệ thống QueenBeautiful (Thủ kho, CSKH, Marketing, Quản lý tài chính, Admin), mật khẩu mã hóa BCrypt.",
+      "columns": [
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "HoTen",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "Sdt",
+          "type": "VARCHAR(20)"
+        },
+        {
+          "name": "Email",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "MatKhau",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "VaiTro",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        },
+        {
+          "name": "ThoiGianKhoa",
+          "type": "DATETIME"
+        },
+        {
+          "name": "ThoiGianMoKhoa",
+          "type": "DATETIME"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "BatBuocDoiMatKhau",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "HanDoiMatKhauTam",
+          "type": "DATETIME2"
+        }
+      ]
+    },
+    {
+      "name": "NHAN_VIEN_VAI_TRO",
+      "cluster": "RBAC",
+      "x": 4940,
+      "y": 2002,
+      "desc": "Bảng gán đa vai trò động cho nhân viên, hỗ trợ 1 nhân viên kiêm nhiệm nhiều vị trí (ví dụ: vừa kiểm duyệt đơn hàng vừa hỗ trợ CTV).",
+      "columns": [
+        {
+          "name": "NhanVienVaiTroID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "VaiTroID",
+          "type": "INT",
+          "fk": "VAI_TRO.VaiTroID",
+          "notNull": true
+        },
+        {
+          "name": "IsPrimary",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(20)",
+          "notNull": true,
+          "default": "HOAT_DONG"
+        },
+        {
+          "name": "NgayBatDau",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysdatetime("
+        },
+        {
+          "name": "NgayKetThuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NguoiGanID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayGan",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysdatetime("
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)"
+        }
+      ]
+    },
+    {
+      "name": "NHAT_KY_PHAN_QUYEN",
+      "cluster": "RBAC",
+      "x": 6020,
+      "y": 1550,
+      "desc": "Audit log lịch sử thay đổi quyền của từng nhân viên hoặc vai trò, phục vụ hậu kiểm bảo mật và giám sát tuân thủ nội bộ.",
+      "columns": [
+        {
+          "name": "NhatKyID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NguoiThucHienID",
+          "type": "INT"
+        },
+        {
+          "name": "HanhDong",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "DoiTuong",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "DoiTuongID",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "GiaTriTruoc",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "GiaTriSau",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "NHAT_KY_THAO_TAC_ADMIN",
+      "cluster": "RBAC",
+      "x": 6020,
+      "y": 1918,
+      "desc": "Audit log toàn diện ghi nhận mọi thao tác nhạy cảm (Sửa/Xóa/Duyệt) của Admin: lưu trữ địa chỉ IP, Endpoint URL, phương thức HTTP và payload dữ liệu trước/sau thay đổi.",
+      "columns": [
+        {
+          "name": "NhatKyID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NguoiThucHienID",
+          "type": "INT"
+        },
+        {
+          "name": "TaiKhoan",
+          "type": "VARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "VaiTro",
+          "type": "VARCHAR(80)",
+          "notNull": true
+        },
+        {
+          "name": "Module",
+          "type": "VARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "PhanHe",
+          "type": "VARCHAR(80)",
+          "notNull": true
+        },
+        {
+          "name": "HanhDong",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "DoiTuong",
+          "type": "NVARCHAR(120)",
+          "notNull": true
+        },
+        {
+          "name": "DoiTuongID",
+          "type": "VARCHAR(120)"
+        },
+        {
+          "name": "HttpMethod",
+          "type": "VARCHAR(10)",
+          "notNull": true
+        },
+        {
+          "name": "Endpoint",
+          "type": "VARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "KetQua",
+          "type": "VARCHAR(20)",
+          "notNull": true
+        },
+        {
+          "name": "HttpStatus",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "DiaChiIP",
+          "type": "VARCHAR(64)"
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "DoiTuongTen",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "DoiTuongEmail",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "GiaTriTruoc",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "GiaTriSau",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "NHA_CUNG_CAP",
+      "cluster": "WAREHOUSE",
+      "x": 100,
+      "y": 1550,
+      "desc": "Danh bạ các nhà phân phối và nhà nhập khẩu mỹ phẩm chính hãng, quản lý số điện thoại, địa chỉ kho và thông tin ký kết hợp đồng nhập hàng.",
+      "columns": [
+        {
+          "name": "NhaCungCapID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenNhaCungCap",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "Sdt",
+          "type": "VARCHAR(20)"
+        },
+        {
+          "name": "DiaChi",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "PHAN_BO_RUT_TIEN_HOA_HONG",
+      "cluster": "CTV",
+      "x": 4500,
+      "y": 1946,
+      "desc": "Khấu trừ từng khoản hoa hồng theo nguyên tắc FIFO (Khoản hoa hồng nào hoàn thành trước sẽ được trừ trước) khi phê duyệt lệnh rút tiền.",
+      "columns": [
+        {
+          "name": "PhanBoRutTienHoaHongID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "RutTienID",
+          "type": "INT",
+          "fk": "YEU_CAU_RUT_TIEN.RutTienID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "HoaHongCongTacVienID",
+          "type": "BIGINT",
+          "fk": "HOA_HONG_CONG_TAC_VIEN.HoaHongCongTacVienID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SoTienPhanBo",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoTienGhiNo",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(20)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThaiHoaHongTruoc",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "ButToanGiuID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "ButToanChiID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "ButToanHoanGiuID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NgayGiu",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayChiTra",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayHoanGiu",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NguoiCapNhatID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "PHAN_HOI",
+      "cluster": "COMMERCE",
+      "x": 820,
+      "y": 612,
+      "desc": "Đánh giá 1-5 sao và nhận xét thực tế từ khách hàng đã mua và nhận hàng thành công (Verified Purchase), phục vụ chấm điểm uy tín sản phẩm và phân tích sentiment khách hàng.",
+      "columns": [
+        {
+          "name": "PhanHoiID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID"
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "DiemDanhGia",
+          "type": "INT"
+        },
+        {
+          "name": "HinhAnh",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "PhanHoiAdmin",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "NgayPhanHoiAdmin",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        }
+      ]
+    },
+    {
+      "name": "PHIEN_GHI_NHAN_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 2700,
+      "y": 1918,
+      "desc": "Quản lý phiên ghi nhận Attribution Token 30 ngày qua Cookie/Link giới thiệu. Tích hợp thuật toán Anti-Self-Purchase chặn tuyệt đối CTV tự mua hàng qua link của chính mình để trục lợi.",
+      "columns": [
+        {
+          "name": "PhienGhiNhanCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "LuotGioiThieuCongTacVienID",
+          "type": "BIGINT",
+          "fk": "LUOT_GIOI_THIEU_CONG_TAC_VIEN.LuotGioiThieuCongTacVienID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "CtvID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID",
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "MaGioiThieuSnapshot",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaPhienHash",
+          "type": "BINARY",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NguonGhiNhan",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(35)",
+          "notNull": true
+        },
+        {
+          "name": "NgayBatDau",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "HetHanLuc",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "NgayGanKhachHang",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgaySuDungGanNhat",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        },
+        {
+          "name": "MucDoRuiRo",
+          "type": "VARCHAR(30)"
+        },
+        {
+          "name": "LyDoRuiRo",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NgayDanhDauRuiRo",
+          "type": "DATETIME2"
+        }
+      ]
+    },
+    {
+      "name": "PHIEN_THANH_TOAN_QR",
+      "cluster": "PAYMENT",
+      "x": 3520,
+      "y": 100,
+      "desc": "Quản lý phiên thanh toán tự động VietQR chuẩn NAPAS 247 qua PayOS. Tự động sinh mã thanh toán độc nhất, nhúng số tiền chính xác, thời gian giữ chỗ tồn kho (TTL 15 phút).",
+      "columns": [
+        {
+          "name": "PhienThanhToanID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaPhien",
+          "type": "VARCHAR(36)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID",
+          "notNull": true
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "VoucherID",
+          "type": "INT",
+          "fk": "MA_KHUYEN_MAI.VoucherID"
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "MaThanhToan",
+          "type": "BIGINT"
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "MaThamChieuNhaCungCap",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "TongTienHang",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "SoTienGiam",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TongThanhToan",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "TienHoaHong",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "DiaChiGiaoHang",
+          "type": "NVARCHAR(1000)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "DuLieuQr",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "LinkQrThanhToan",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "NoiDungThanhToan",
+          "type": "NVARCHAR(25)"
+        },
+        {
+          "name": "HetHanLuc",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "ThanhToanLuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "KetThucLuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "LyDoKetThuc",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "PhienBan",
+          "type": "BIGINT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "MuaNgay",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "PhienGhiNhanCongTacVienID",
+          "type": "BIGINT",
+          "fk": "PHIEN_GHI_NHAN_CONG_TAC_VIEN.PhienGhiNhanCongTacVienID"
+        },
+        {
+          "name": "MaCtvSnapshot",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "TenCtvSnapshot",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "NguonGioiThieuSnapshot",
+          "type": "VARCHAR(30)"
+        }
+      ]
+    },
+    {
+      "name": "PHIEU_KIEM_KE",
+      "cluster": "WAREHOUSE",
+      "x": 460,
+      "y": 2426,
+      "desc": "Biên bản kiểm kê kho định kỳ (tháng/quý): đối chiếu số lượng tồn lý thuyết trên phần mềm và số lượng đếm thực tế tại kệ kho để kịp thời phát hiện thất thoát.",
+      "columns": [
+        {
+          "name": "PhieuKiemKeID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayKiemKe",
+          "type": "DATETIME"
+        },
+        {
+          "name": "GhiChu",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "PHIEU_NHAP_KHO",
+      "cluster": "WAREHOUSE",
+      "x": 460,
+      "y": 1550,
+      "desc": "Chứng từ nhập hàng vào kho từ nhà cung cấp: tổng giá trị nhập hàng, nhân viên thủ kho lập phiếu, ngày nhập và quản lý quy trình phê duyệt kho hàng.",
+      "columns": [
+        {
+          "name": "PhieuNhapID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NhaCungCapID",
+          "type": "INT",
+          "fk": "NHA_CUNG_CAP.NhaCungCapID"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayNhap",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TongTien",
+          "type": "DECIMAL(18,2)",
+          "notNull": true
+        },
+        {
+          "name": "MaPhieuNhap",
+          "type": "VARCHAR(40)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NguoiTaoID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "NguoiDuyetID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "LoaiNhap",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "GhiChu",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "LyDoTuChoi",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "TongSoLuong",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "PhienBan",
+          "type": "BIGINT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "PHIEU_XUAT_KHO",
+      "cluster": "WAREHOUSE",
+      "x": 820,
+      "y": 1550,
+      "desc": "Chứng từ xuất kho vận hành nội bộ (Xuất mẫu thử marketing, thanh lý hàng cận date, xuất luân chuyển kho chi nhánh), có quy trình kiểm soát kép Người lập -> Quản lý duyệt.",
+      "columns": [
+        {
+          "name": "PhieuXuatID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayXuat",
+          "type": "DATETIME"
+        },
+        {
+          "name": "LyDoXuat",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "MaPhieuXuat",
+          "type": "VARCHAR(40)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "NguoiDuyetID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "LoaiXuat",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "MaThamChieu",
+          "type": "NVARCHAR(120)"
+        },
+        {
+          "name": "LyDoTuChoi",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "KhoaIdempotency",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "PhienBan",
+          "type": "BIGINT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "PHIEU_XU_LY_HANG_HOAN",
+      "cluster": "WAREHOUSE",
+      "x": 1900,
+      "y": 1550,
+      "desc": "Phiếu tiếp nhận và kiểm định vật lý kiện hàng đổi trả từ khách hàng gửi về: ghi nhận nhân viên thủ kho tiếp nhận, tình trạng niêm phong và trạng thái xử lý.",
+      "columns": [
+        {
+          "name": "PhieuHangHoanID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID",
+          "notNull": true
+        },
+        {
+          "name": "DoiTraID",
+          "type": "INT",
+          "fk": "YEU_CAU_DOI_TRA.DoiTraID"
+        },
+        {
+          "name": "LoaiHangHoan",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "KhoaTaoPhieu",
+          "type": "VARCHAR(180)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "KhoaNhanHang",
+          "type": "VARCHAR(180)"
+        },
+        {
+          "name": "KhoaKiemDinh",
+          "type": "VARCHAR(180)"
+        },
+        {
+          "name": "NguoiTaoID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NguoiNhanID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NguoiKiemDinhID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayNhan",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayKiemDinh",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "PhienBan",
+          "type": "BIGINT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "PHUONG_XA",
+      "cluster": "SUPPORT",
+      "x": 5740,
+      "y": 472,
+      "desc": "Danh mục Phường / Xã trực thuộc Quận/Huyện, hoàn thiện chuỗi địa chỉ 3 cấp chuẩn hóa của hệ thống.",
+      "columns": [
+        {
+          "name": "PhuongXaID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenPhuongXa",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "QuanHuyenID",
+          "type": "INT",
+          "fk": "QUAN_HUYEN.QuanHuyenID",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "QUAN_HUYEN",
+      "cluster": "SUPPORT",
+      "x": 5740,
+      "y": 272,
+      "desc": "Danh mục Quận / Huyện trực thuộc Tỉnh/Thành phố.",
+      "columns": [
+        {
+          "name": "QuanHuyenID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenQuanHuyen",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "TinhThanhID",
+          "type": "INT",
+          "fk": "TINH_THANH.TinhThanhID",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "QUYEN",
+      "cluster": "RBAC",
+      "x": 5660,
+      "y": 2030,
+      "desc": "Từ điển quyền hạn chi tiết hạt mịn (Fine-grained Permissions) như: ORDER_VIEW, ORDER_CONFIRM, PRODUCT_CREATE, FLASH_SALE_MANAGE, WITHDRAWAL_APPROVE, RBAC_CONFIG.",
+      "columns": [
+        {
+          "name": "QuyenID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaQuyen",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "TenHienThi",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "NhomQuyen",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "HoatDong",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        },
+        {
+          "name": "risk_level",
+          "type": "VARCHAR(50)",
+          "notNull": true,
+          "default": "NORMAL"
+        },
+        {
+          "name": "legacy",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "dependencies",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "system_reserved",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "QUY_TAC_HOA_HONG",
+      "cluster": "CTV",
+      "x": 3060,
+      "y": 2086,
+      "desc": "Quy tắc ghi đè hoa hồng ưu đãi riêng cho các chiến dịch sản phẩm đặc biệt (ví dụ: đẩy hàng tồn son thưởng thêm 5%, dòng kem cao cấp hoa hồng cố định 50.000đ).",
+      "columns": [
+        {
+          "name": "QuyTacHoaHongID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "ChinhSachHoaHongID",
+          "type": "BIGINT",
+          "fk": "CHINH_SACH_HOA_HONG.ChinhSachHoaHongID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "LoaiQuyTac",
+          "type": "VARCHAR(40)",
+          "notNull": true
+        },
+        {
+          "name": "SoTienCoDinhMoiDonVi",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TyLePhanTram",
+          "type": "DECIMAL(9,4)"
+        },
+        {
+          "name": "SoChuSoLamTron",
+          "type": "INT",
+          "notNull": true,
+          "default": "2"
+        },
+        {
+          "name": "KieuLamTron",
+          "type": "VARCHAR(20)",
+          "notNull": true,
+          "default": "HALF_UP"
+        },
+        {
+          "name": "TrangThai",
+          "type": "VARCHAR(20)",
+          "notNull": true,
+          "default": "ACTIVE"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "SAN_PHAM",
+      "cluster": "CATALOG",
+      "x": 1980,
+      "y": 100,
+      "desc": "Thực thể sản phẩm mỹ phẩm gốc: lưu trữ tên sản phẩm, slug thân thiện SEO, giá bán cơ sở, liên kết Danh mục và Thương hiệu, hỗ trợ bộ lọc đa thuộc tính trên trang chủ và danh sách sản phẩm.",
+      "columns": [
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DanhMucID",
+          "type": "INT",
+          "fk": "DANH_MUC.DanhMucID"
+        },
+        {
+          "name": "ThuongHieuID",
+          "type": "INT",
+          "fk": "THUONG_HIEU.ThuongHieuID"
+        },
+        {
+          "name": "TenSP",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "GiaBan",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "HoaHongCTV",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "TinhChatDa",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(100)"
+        },
+        {
+          "name": "Slug",
+          "type": "VARCHAR(255)",
+          "uq": true
+        },
+        {
+          "name": "HoTroTryOn",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        }
+      ]
+    },
+    {
+      "name": "SAN_PHAM_CONG_DUNG",
+      "cluster": "CATALOG",
+      "x": 2700,
+      "y": 728,
+      "desc": "Bảng liên kết quan hệ nhiều - nhiều (N-N) giữa Sản phẩm và Công dụng điều trị, phục vụ tính năng lọc đa tiêu chí (Multi-criteria facet filtering) trên giao diện mua sắm.",
+      "columns": [
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "pk": true,
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "CongDungID",
+          "type": "INT",
+          "pk": true,
+          "fk": "CONG_DUNG.CongDungID",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "SAN_PHAM_THANH_PHAN",
+      "cluster": "CATALOG",
+      "x": 2700,
+      "y": 556,
+      "desc": "Bảng liên kết quan hệ nhiều - nhiều (N-N) giữa Sản phẩm và Thành phần hoạt chất, cho phép 1 sản phẩm chứa nhiều thành phần và 1 thành phần xuất hiện ở nhiều sản phẩm.",
+      "columns": [
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "pk": true,
+          "fk": "SAN_PHAM.SanPhamID",
+          "notNull": true
+        },
+        {
+          "name": "ThanhPhanID",
+          "type": "INT",
+          "pk": true,
+          "fk": "THANH_PHAN.ThanhPhanID",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "SAN_PHAM_YEU_THICH",
+      "cluster": "COMMERCE",
+      "x": 1180,
+      "y": 1008,
+      "desc": "Danh sách sản phẩm yêu thích (Wishlist) của từng khách hàng, giúp lưu lại sản phẩm quan tâm và làm dữ liệu đầu vào cho hệ thống gợi ý sản phẩm cá nhân hóa.",
+      "columns": [
+        {
+          "name": "YeuThichID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID",
+          "uq": true
+        },
+        {
+          "name": "SanPhamID",
+          "type": "INT",
+          "fk": "SAN_PHAM.SanPhamID",
+          "uq": true
+        },
+        {
+          "name": "NgayThem",
+          "type": "DATETIME",
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "SU_KIEN_WEBHOOK_THANH_TOAN",
+      "cluster": "PAYMENT",
+      "x": 3880,
+      "y": 608,
+      "desc": "Nhật ký nhận Webhook thanh toán từ PayOS/Ngân hàng với chữ ký HMAC-SHA256. Đảm bảo tính Idempotency: xử lý cộng tiền và xác nhận đơn hàng đúng 1 lần duy nhất, chống tấn công phát lại.",
+      "columns": [
+        {
+          "name": "SuKienWebhookID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "NhaCungCap",
+          "type": "VARCHAR(30)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "MaSuKienNCC",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "ThoiGianXuLy",
+          "type": "DATETIME2",
+          "notNull": true
+        },
+        {
+          "name": "MaThamChieuNCC",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "MaDonHangNCC",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "MaNoiDung",
+          "type": "VARCHAR(64)",
+          "notNull": true
+        },
+        {
+          "name": "KetQuaXuLy",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "TEP_DINH_KEM_HO_TRO",
+      "cluster": "SUPPORT",
+      "x": 4660,
+      "y": 552,
+      "desc": "Lưu trữ tệp đính kèm, ảnh chụp bằng chứng sản phẩm lỗi, ảnh chụp hóa đơn giao dịch của khách hàng khi gửi phiếu hỗ trợ CSKH.",
+      "columns": [
+        {
+          "name": "TepDinhKemID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TinNhanID",
+          "type": "BIGINT",
+          "fk": "TIN_NHAN_HO_TRO_CTV.TinNhanID",
+          "notNull": true
+        },
+        {
+          "name": "TenTepLuuTru",
+          "type": "VARCHAR(255)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "TenTepGoc",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "LoaiTep",
+          "type": "VARCHAR(10)",
+          "notNull": true
+        },
+        {
+          "name": "MimeType",
+          "type": "VARCHAR(100)",
+          "notNull": true
+        },
+        {
+          "name": "KichThuoc",
+          "type": "BIGINT",
+          "notNull": true
+        },
+        {
+          "name": "NgayTaiLen",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "THANH_PHAN",
+      "cluster": "CATALOG",
+      "x": 2700,
+      "y": 100,
+      "desc": "Từ điển các thành phần hoạt chất mỹ phẩm (Hyaluronic Acid, BHA/Salicylic Acid, Retinol, Niacinamide, Vitamin C, Ceramide...) phục vụ tra cứu độ lành tính và cảnh báo kích ứng da.",
+      "columns": [
+        {
+          "name": "ThanhPhanID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenThanhPhan",
+          "type": "NVARCHAR(255)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT",
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "THONG_BAO",
+      "cluster": "SUPPORT",
+      "x": 5020,
+      "y": 724,
+      "desc": "Hệ thống thông báo In-App gửi tới khách hàng: cập nhật trạng thái đơn hàng (Đang giao, Đã giao), chương trình Flash Sale mới và biến động số dư ví.",
+      "columns": [
+        {
+          "name": "ThongBaoID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "CtvID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "ThoiGian",
+          "type": "DATETIME"
+        },
+        {
+          "name": "DaDoc",
+          "type": "BIT",
+          "default": "0"
+        },
+        {
+          "name": "Link",
+          "type": "NVARCHAR(500)"
+        }
+      ]
+    },
+    {
+      "name": "THONG_BAO_ADMIN",
+      "cluster": "SUPPORT",
+      "x": 5020,
+      "y": 100,
+      "desc": "Bảng lưu trữ thông báo nghiệp vụ nội bộ dành cho nhân viên quản trị: đơn hàng mới, thanh toán QR thành công, yêu cầu rút tiền CTV, phiếu nhập kho chờ duyệt và ticket CSKH khẩn cấp.",
+      "columns": [
+        {
+          "name": "ThongBaoAdminID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "LoaiSuKien",
+          "type": "VARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "PhanHe",
+          "type": "VARCHAR(50)",
+          "notNull": true
+        },
+        {
+          "name": "QuyenYeuCau",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "TieuDe",
+          "type": "NVARCHAR(200)",
+          "notNull": true
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(500)",
+          "notNull": true
+        },
+        {
+          "name": "MaThamChieu",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "DuongDanDieuHuong",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "MucDoUuTien",
+          "type": "VARCHAR(20)",
+          "default": "INFO"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "default": "(getdate("
+        },
+        {
+          "name": "NguoiTaoID",
+          "type": "INT"
+        }
+      ]
+    },
+    {
+      "name": "THONG_BAO_ADMIN_DOC",
+      "cluster": "SUPPORT",
+      "x": 5020,
+      "y": 524,
+      "desc": "Theo dõi trạng thái ĐÃ ĐỌC thông báo nội bộ theo từng nhân viên (Per-User Read State), hỗ trợ đếm số lượng thông báo chưa đọc (Unread Badge Count) theo thời gian thực trên thanh công cụ quản trị.",
+      "columns": [
+        {
+          "name": "ThongBaoAdminID",
+          "type": "INT",
+          "pk": true,
+          "fk": "THONG_BAO_ADMIN.ThongBaoAdminID",
+          "notNull": true
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "pk": true,
+          "fk": "NHAN_VIEN.NhanVienID",
+          "notNull": true
+        },
+        {
+          "name": "NgayDoc",
+          "type": "DATETIME",
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "THUONG_HIEU",
+      "cluster": "CATALOG",
+      "x": 1620,
+      "y": 412,
+      "desc": "Danh mục các thương hiệu mỹ phẩm chính hãng (La Roche-Posay, Innisfree, MAC, L'Oreal...), thông tin xuất xứ quốc gia (Pháp, Hàn Quốc, Mỹ, Nhật Bản) và logo thương hiệu.",
+      "columns": [
+        {
+          "name": "ThuongHieuID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenThuongHieu",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "TrangThaiHVT",
+          "type": "BIT"
+        }
+      ]
+    },
+    {
+      "name": "TINH_THANH",
+      "cluster": "SUPPORT",
+      "x": 5740,
+      "y": 100,
+      "desc": "Danh mục 63 Tỉnh / Thành phố Việt Nam chuẩn hóa, làm gốc phân cấp cho việc tính phí vận chuyển và quản lý địa chỉ nhận hàng.",
+      "columns": [
+        {
+          "name": "TinhThanhID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenTinhThanh",
+          "type": "NVARCHAR(100)",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "TIN_NHAN_DON_HANG",
+      "cluster": "SUPPORT",
+      "x": 4660,
+      "y": 100,
+      "desc": "Hội thoại hỗ trợ trực tuyến thời gian thực qua giao thức WebSocket STOMP gắn trực tiếp với từng đơn hàng giữa khách hàng và nhân viên CSKH.",
+      "columns": [
+        {
+          "name": "TinNhanID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID",
+          "notNull": true
+        },
+        {
+          "name": "LoaiNguoiGui",
+          "type": "VARCHAR(30)",
+          "notNull": true
+        },
+        {
+          "name": "NguoiGuiID",
+          "type": "INT"
+        },
+        {
+          "name": "TenNguoiGui",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(2000)",
+          "notNull": true
+        },
+        {
+          "name": "LoaiTinNhan",
+          "type": "VARCHAR(30)",
+          "notNull": true,
+          "default": "TEXT"
+        },
+        {
+          "name": "ClientMessageID",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "LaBot",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "DaDocLuc",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "DinhKemUrl",
+          "type": "NVARCHAR(1000)"
+        }
+      ]
+    },
+    {
+      "name": "TIN_NHAN_HO_TRO_CTV",
+      "cluster": "SUPPORT",
+      "x": 4300,
+      "y": 636,
+      "desc": "Kênh trao đổi trực tiếp giữa chuyên viên quản lý đối tác và CTV về chiến dịch tiếp thị, tài liệu sản phẩm và hướng dẫn rút tiền.",
+      "columns": [
+        {
+          "name": "TinNhanID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "YeuCauID",
+          "type": "INT",
+          "fk": "YEU_CAU_HO_TRO.YeuCauID",
+          "notNull": true
+        },
+        {
+          "name": "LoaiNguoiGui",
+          "type": "VARCHAR(20)",
+          "notNull": true
+        },
+        {
+          "name": "NguoiGuiID",
+          "type": "INT",
+          "notNull": true
+        },
+        {
+          "name": "TenNguoiGui",
+          "type": "NVARCHAR(255)",
+          "notNull": true
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(MAX)",
+          "notNull": true
+        },
+        {
+          "name": "ClientMessageID",
+          "type": "VARCHAR(80)"
+        },
+        {
+          "name": "NgayGui",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "LoaiTinNhan",
+          "type": "VARCHAR(30)",
+          "notNull": true,
+          "default": "TEXT"
+        },
+        {
+          "name": "DinhKemUrl",
+          "type": "NVARCHAR(1000)"
+        },
+        {
+          "name": "DaDocLuc",
+          "type": "DATETIME2"
+        }
+      ]
+    },
+    {
+      "name": "VAI_TRO",
+      "cluster": "RBAC",
+      "x": 5660,
+      "y": 1550,
+      "desc": "Danh mục các nhóm vai trò trong hệ thống (SUPER_ADMIN, WAREHOUSE_MANAGER, ORDER_STAFF, CTV_SUPPORT, MARKETING_LEAD).",
+      "columns": [
+        {
+          "name": "VaiTroID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "TenVaiTro",
+          "type": "NVARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "MoTa",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "ThoiGianAn",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "MauSac",
+          "type": "VARCHAR(50)",
+          "notNull": true,
+          "default": "#8b949e"
+        },
+        {
+          "name": "ma_vai_tro",
+          "type": "VARCHAR(100)",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "cap_bac",
+          "type": "INT",
+          "notNull": true,
+          "default": "20"
+        },
+        {
+          "name": "vai_tro_he_thong",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "hoan_tat_cau_hinh",
+          "type": "BIT",
+          "notNull": true,
+          "default": "1"
+        },
+        {
+          "name": "nguoi_tao_id",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "ngay_tao",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        },
+        {
+          "name": "ngay_cap_nhat",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        }
+      ]
+    },
+    {
+      "name": "VAI_TRO_QUAN_LY",
+      "cluster": "RBAC",
+      "x": 5660,
+      "y": 2710,
+      "desc": "Quản lý phạm vi cấp quyền theo vai trò (Role Management Scope): định nghĩa vai trò cấp trên được phép quản lý, phân công hoặc thu hồi những vai trò cấp dưới nào trong hệ thống RBAC.",
+      "columns": [
+        {
+          "name": "VaiTroQuanLyID",
+          "type": "INT",
+          "pk": true,
+          "fk": "VAI_TRO.VaiTroID",
+          "notNull": true
+        },
+        {
+          "name": "VaiTroMucTieuID",
+          "type": "INT",
+          "pk": true,
+          "fk": "VAI_TRO.VaiTroID",
+          "notNull": true
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        },
+        {
+          "name": "NguoiTaoID",
+          "type": "INT"
+        }
+      ]
+    },
+    {
+      "name": "VAI_TRO_QUYEN",
+      "cluster": "RBAC",
+      "x": 5660,
+      "y": 2482,
+      "desc": "Ma trận phân quyền động giữa Vai trò và Quyền hạn. Cho phép Super Admin tùy biến phân quyền trực tiếp trên giao diện Admin mà không cần sửa code hay build lại Backend.",
+      "columns": [
+        {
+          "name": "VaiTroID",
+          "type": "INT",
+          "pk": true,
+          "fk": "VAI_TRO.VaiTroID",
+          "notNull": true
+        },
+        {
+          "name": "QuyenID",
+          "type": "INT",
+          "pk": true,
+          "fk": "QUYEN.QuyenID",
+          "notNull": true
+        },
+        {
+          "name": "NgayGan",
+          "type": "DATETIME",
+          "notNull": true,
+          "default": "(getdate("
+        },
+        {
+          "name": "NguoiGanID",
+          "type": "INT"
+        }
+      ]
+    },
+    {
+      "name": "VI_CONG_TAC_VIEN",
+      "cluster": "CTV",
+      "x": 3780,
+      "y": 1550,
+      "desc": "Sổ cái tài chính ví CTV: quản lý chặt chẽ Số dư khả dụng (SoDuKhaDung) và Số dư tạm giữ (SoDuTamGiu - khóa trong 7 ngày chống hoàn đơn) và tổng hoa hồng trọn đời.",
+      "columns": [
+        {
+          "name": "ViCongTacVienID",
+          "type": "BIGINT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID",
+          "uq": true,
+          "notNull": true
+        },
+        {
+          "name": "SoDuChoDuyet",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "SoDuKhaDung",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "SoDuTamGiu",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TongDaChi",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "CongNo",
+          "type": "DECIMAL(18,2)",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "TrangThaiDoiSoat",
+          "type": "VARCHAR(30)",
+          "notNull": true,
+          "default": "HOAT_DONG"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    },
+    {
+      "name": "XAC_MINH_OTP",
+      "cluster": "COMMERCE",
+      "x": 100,
+      "y": 948,
+      "desc": "Quản lý mã xác thực OTP 6 số gửi qua Email với cơ chế hết hạn tự động (TTL 5 phút), cờ DaXacMinh chống tấn công Brute-force và Replay Attack khi đăng ký, đổi mật khẩu hoặc xác thực rút tiền.",
+      "columns": [
+        {
+          "name": "OtpID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "Email",
+          "type": "VARCHAR(255)"
+        },
+        {
+          "name": "OtpCode",
+          "type": "VARCHAR(100)"
+        },
+        {
+          "name": "ThoiGianHetHan",
+          "type": "DATETIME"
+        },
+        {
+          "name": "LoaiOtp",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "TrangThai",
+          "type": "BIT"
+        },
+        {
+          "name": "DaSuDung",
+          "type": "BIT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "SoLanThu",
+          "type": "INT",
+          "notNull": true,
+          "default": "0"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME2",
+          "notNull": true,
+          "default": "(sysutcdatetime("
+        }
+      ]
+    },
+    {
+      "name": "YEU_CAU_DOI_TRA",
+      "cluster": "WAREHOUSE",
+      "x": 1540,
+      "y": 1550,
+      "desc": "Quản lý quy trình đổi trả hàng trong 7 ngày theo chính sách mỹ phẩm. Lưu trữ lý do, link hình ảnh/video bằng chứng mở hộp, trạng thái duyệt CSKH (CHO_XU_LY -> DANG_KIEM_DINH -> DA_HOAN_TIEN) và số tiền hoàn.",
+      "columns": [
+        {
+          "name": "DoiTraID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "DonHangID",
+          "type": "INT",
+          "fk": "DON_HANG.DonHangID"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "LyDo",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "HinhAnhBangChung",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "NgayYeuCau",
+          "type": "DATETIME"
+        },
+        {
+          "name": "NgayXuLy",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "TienHoan",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "PhanHoiTuAdmin",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "LyDoPhanLoai",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "MoTaChiTiet",
+          "type": "NVARCHAR(MAX)"
+        }
+      ]
+    },
+    {
+      "name": "YEU_CAU_HO_TRO",
+      "cluster": "SUPPORT",
+      "x": 4300,
+      "y": 100,
+      "desc": "Phiếu yêu cầu trợ giúp (Ticket Support) của Khách hàng hoặc Cộng tác viên khi cần tư vấn chuyên sâu về mỹ phẩm, giao hàng hoặc đối soát hoa hồng.",
+      "columns": [
+        {
+          "name": "YeuCauID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "KhachHangID",
+          "type": "INT",
+          "fk": "KHACH_HANG.KhachHangID"
+        },
+        {
+          "name": "NhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "TieuDe",
+          "type": "NVARCHAR(255)"
+        },
+        {
+          "name": "NoiDung",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "NgayTao",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "PhanHoiTuAdmin",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "LoaiYeuCau",
+          "type": "VARCHAR(50)",
+          "notNull": true,
+          "default": "GENERAL"
+        },
+        {
+          "name": "MucDoUuTien",
+          "type": "VARCHAR(20)",
+          "notNull": true,
+          "default": "NORMAL"
+        },
+        {
+          "name": "NgayCapNhat",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NhanVienPhuTrachID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayGiaiQuyet",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayDong",
+          "type": "DATETIME2"
+        }
+      ]
+    },
+    {
+      "name": "YEU_CAU_RUT_TIEN",
+      "cluster": "CTV",
+      "x": 4140,
+      "y": 1550,
+      "desc": "Lệnh yêu cầu rút tiền hoa hồng từ ví CTV về tài khoản ngân hàng cá nhân, lưu trữ thông tin ngân hàng thụ hưởng, số tài khoản và trạng thái xử lý.",
+      "columns": [
+        {
+          "name": "RutTienID",
+          "type": "INT",
+          "pk": true,
+          "notNull": true
+        },
+        {
+          "name": "MaGiaoDich",
+          "type": "VARCHAR(100)",
+          "uq": true
+        },
+        {
+          "name": "CTVID",
+          "type": "INT",
+          "fk": "CONG_TAC_VIEN.CTVID"
+        },
+        {
+          "name": "SoTienRut",
+          "type": "DECIMAL(18,2)"
+        },
+        {
+          "name": "NgayYeuCau",
+          "type": "DATETIME"
+        },
+        {
+          "name": "NgayXuLy",
+          "type": "DATETIME"
+        },
+        {
+          "name": "TrangThai",
+          "type": "NVARCHAR(50)"
+        },
+        {
+          "name": "GhiChu",
+          "type": "NVARCHAR(MAX)"
+        },
+        {
+          "name": "TrangThaiChuan",
+          "type": "VARCHAR(45)",
+          "notNull": true
+        },
+        {
+          "name": "NguoiTaoNhanVienID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NguoiXuLyID",
+          "type": "INT",
+          "fk": "NHAN_VIEN.NhanVienID"
+        },
+        {
+          "name": "NgayDuyet",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "NgayChiTra",
+          "type": "DATETIME2"
+        },
+        {
+          "name": "LyDoTuChoi",
+          "type": "NVARCHAR(500)"
+        },
+        {
+          "name": "ButToanGiuID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "ButToanChiID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "ButToanHoanGiuID",
+          "type": "BIGINT",
+          "fk": "BUT_TOAN_VI_CONG_TAC_VIEN.ButToanViCongTacVienID"
+        },
+        {
+          "name": "PhienBan",
+          "type": "TIMESTAMP",
+          "notNull": true
+        }
+      ]
+    }
+  ]
+};
+
+    const CLUSTER_NAMES = {
+      COMMERCE: "Khách Hàng & Đơn Hàng",
+      CATALOG: "Sản Phẩm & Danh Mục",
+      PROMO: "Khuyến Mãi & Sale",
+      WAREHOUSE: "Kho Hàng & Thẻ Kho",
+      CTV: "Tiếp Thị CTV",
+      PAYMENT: "Thanh Toán QR",
+      RBAC: "Phân Quyền RBAC",
+      SUPPORT: "Hỗ Trợ & Địa Bàn"
+    };
+
+    const CLUSTER_HEX = {
+      COMMERCE: "#3b82f6",
+      CATALOG: "#10b981",
+      PROMO: "#f59e0b",
+      WAREHOUSE: "#8b5cf6",
+      CTV: "#ec4899",
+      PAYMENT: "#06b6d4",
+      RBAC: "#ef4444",
+      SUPPORT: "#64748b"
+    };
+
+    // Precalculate all connections
+    const ALL_CONNECTIONS = [];
+    DB_SCHEMA.tables.forEach(sourceTable => {
+      sourceTable.columns.forEach(col => {
+        if (col.fk) {
+          const [targetTableName, targetColName] = col.fk.split(".");
+          const targetTable = DB_SCHEMA.tables.find(t => t.name === targetTableName);
+
+          if (targetTable) {
+            ALL_CONNECTIONS.push({
+              id: `${sourceTable.name}.${col.name}->${targetTableName}.${targetColName}`,
+              source: sourceTable,
+              target: targetTable,
+              sourceTable: sourceTable.name,
+              targetTable: targetTableName,
+              sourceCol: col.name,
+              targetCol: targetColName,
+              isUnique: Boolean(col.uq),
+              isNotNull: Boolean(col.notNull)
+            });
+          }
+        }
+      });
+    });
+
+    let state = {
+      zoom: 0.52,
+      panX: 30,
+      panY: 20,
+      isDragging: false,
+      hasDragged: false,
+      startClientX: 0,
+      startClientY: 0,
+      startX: 0,
+      startY: 0,
+      activeTable: null,
+      filter: "ALL"
+    };
+
+    let justFinishedDrag = false;
+    let isRenderPending = false;
+
+    const viewport = document.getElementById("viewport");
+    const canvas = document.getElementById("canvas");
+    const tablesContainer = document.getElementById("tablesContainer");
+    const svgRel = document.getElementById("relationships");
+    const pathsLayer = document.getElementById("pathsLayer");
+    const drawer = document.getElementById("drawer");
+    const drawerTableName = document.getElementById("drawerTableName");
+    const drawerCategoryBadge = document.getElementById("drawerCategoryBadge");
+    const drawerContent = document.getElementById("drawerContent");
+    const btnResetFocus = document.getElementById("btnResetFocus");
+    const searchInput = document.getElementById("searchInput");
+    const searchResultsDropdown = document.getElementById("searchResultsDropdown");
+    const lblTotalTablesHeader = document.getElementById("lblTotalTablesHeader");
+
+    if (lblTotalTablesHeader) {
+      lblTotalTablesHeader.innerText = `${DB_SCHEMA.tables.length} BẢNG`;
+    }
+    document.title = `QueenBeautiful / BeautiQ — Sơ Đồ Cơ Sở Dữ Liệu ERD Tương Tác (${DB_SCHEMA.tables.length} Bảng CSDL)`;
+
+    function getNeighbors(tableName) {
+      if (!tableName) return new Set();
+      const neighbors = new Set();
+      ALL_CONNECTIONS.forEach(conn => {
+        if (conn.sourceTable === tableName) neighbors.add(conn.targetTable);
+        if (conn.targetTable === tableName) neighbors.add(conn.sourceTable);
+      });
+      return neighbors;
+    }
+
+    function normalizeStr(str) {
+      return (str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[_s\-]+/g, "");
+    }
+
+    function updateMinimapLens() {
+      const lens = document.getElementById("minimapLens");
+      if (!lens) return;
+      const minimap = document.getElementById("minimap");
+      if (!minimap) return;
+      const w = minimap.offsetWidth;
+      const h = minimap.offsetHeight;
+      const scaleX = w / 6650; const scaleY = h / 3404;
+      const vpW = viewport.offsetWidth / state.zoom * scaleX;
+      const vpH = viewport.offsetHeight / state.zoom * scaleY;
+      const lensX = -state.panX / state.zoom * scaleX;
+      const lensY = -state.panY / state.zoom * scaleY;
+
+      lens.style.width = `${Math.min(vpW, w)}px`;
+      lens.style.height = `${Math.min(vpH, h)}px`;
+      lens.style.left = `${Math.max(0, Math.min(lensX, w - vpW))}px`;
+      lens.style.top = `${Math.max(0, Math.min(lensY, h - vpH))}px`;
+    }
+
+    // EXACT HIGH-PERFORMANCE TRANSFORM FROM SYSTEM-PRESENTATION-MAP.HTML
+    function updateTransform(smooth = false) {
+      if (smooth) {
+        canvas.style.transition = "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)";
+        canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+      } else {
+        canvas.style.transition = "none";
+        if (!isRenderPending) {
+          isRenderPending = true;
+          requestAnimationFrame(() => {
+            canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+            isRenderPending = false;
+          });
+        }
+      }
+    }
+
+    function getCrowsFootMarkerStart(isUnique, isNotNull) {
+      if (isUnique) {
+        return isNotNull ? "marker-one-unique-mandatory" : "marker-one-unique-optional";
+      } else {
+        return isNotNull ? "marker-many-mandatory" : "marker-many-optional";
+      }
+    }
+
+    // INITIAL RENDER OF DOM NODES
+    
+    function calculateConnectionPath(conn, offX = 0, offY = 0) {
+      const cardW = 280;
+      const rowH = 25;
+      const headerH = 32;
+
+      const sColIdx = Math.max(0, conn.source.columns.findIndex(c => c.name === conn.sourceCol));
+      const tColIdx = Math.max(0, conn.target.columns.findIndex(c => c.name === conn.targetCol));
+
+      const sourceRowY = conn.source.y + offY + headerH + sColIdx * rowH + (rowH / 2);
+      const targetRowY = conn.target.y + offY + headerH + tColIdx * rowH + (rowH / 2);
+
+      let sx, sy, tx, ty, pathData;
+
+      // Hash connection ID to get a deterministic fan-out spread offset (-18px to +18px)
+      let hash = 0;
+      for (let i = 0; i < conn.id.length; i++) hash = ((hash << 5) - hash) + conn.id.charCodeAt(i);
+      const spreadOffset = ((Math.abs(hash) % 7) - 3) * 6;
+
+      // 1. Self-referencing table
+      if (conn.sourceTable === conn.targetTable) {
+        sx = conn.source.x + offX;
+        sy = sourceRowY;
+        tx = conn.source.x + offX;
+        ty = targetRowY;
+        const stub = 35;
+        pathData = `M ${sx} ${sy} L ${sx - stub} ${sy} C ${sx - stub - 40} ${sy}, ${sx - stub - 40} ${ty}, ${tx - stub} ${ty} L ${tx} ${ty}`;
+      } 
+      // 2. Tables in the same column (or close horizontally)
+      else if (Math.abs(conn.source.x - conn.target.x) < 60) {
+        sx = conn.source.x + offX + cardW;
+        sy = sourceRowY;
+        tx = conn.target.x + offX + cardW;
+        ty = targetRowY;
+        const stub = 30;
+        const arcDist = Math.max(50, Math.min(Math.abs(ty - sy) * 0.22, 100)) + Math.abs(spreadOffset);
+        pathData = `M ${sx} ${sy} L ${sx + stub} ${sy} C ${sx + stub + arcDist} ${sy}, ${tx + stub + arcDist} ${ty}, ${tx + stub} ${ty} L ${tx} ${ty}`;
+      } 
+      // 3. Tables in different columns
+      else {
+        const isSourceLeft = conn.source.x < conn.target.x;
+        sx = isSourceLeft ? conn.source.x + offX + cardW : conn.source.x + offX;
+        sy = sourceRowY;
+        tx = isSourceLeft ? conn.target.x + offX : conn.target.x + offX + cardW;
+        ty = targetRowY;
+        
+        const dist = Math.abs(tx - sx);
+        const sStubLen = Math.min(32, Math.max(18, dist * 0.18));
+        const tStubLen = Math.min(32, Math.max(18, dist * 0.18));
+
+        const sStub = isSourceLeft ? sStubLen : -sStubLen;
+        const tStub = isSourceLeft ? -tStubLen : tStubLen;
+        
+        const p1x = sx + sStub;
+        const p2x = tx + tStub;
+        const dx = Math.max(Math.abs(p2x - p1x) * 0.45, 35);
+        
+        // Add subtle vertical and horizontal spread so parallel lines fan out gracefully
+        const c1y = sy + (Math.abs(ty - sy) > 40 ? spreadOffset * 0.5 : 0);
+        const c2y = ty - (Math.abs(ty - sy) > 40 ? spreadOffset * 0.5 : 0);
+
+        pathData = `M ${sx} ${sy} L ${p1x} ${sy} C ${p1x + (isSourceLeft ? dx : -dx)} ${c1y}, ${p2x + (isSourceLeft ? -dx : dx)} ${c2y}, ${p2x} ${ty} L ${tx} ${ty}`;
+      }
+
+      return pathData;
+    }
+
+    function buildInitialDom() {
+      tablesContainer.innerHTML = "";
+      if (pathsLayer) pathsLayer.innerHTML = "";
+
+      DB_SCHEMA.tables.forEach(table => {
+        const isClusterMatch = state.filter === "ALL" || table.cluster === state.filter;
+        if (!isClusterMatch) return;
+
+        const card = document.createElement("div");
+        card.className = "table-card";
+        card.id = `table_${table.name}`;
+        card.setAttribute("data-table", table.name);
+        card.style.left = `${table.x}px`;
+        card.style.top = `${table.y}px`;
+
+        let colsHtml = table.columns.map(col => {
+          let badge = '<span class="col-dot"></span>';
+          if (col.pk) badge = '<span class="badge badge-pk" title="Khóa chính (PK)">PK</span>';
+          else if (col.fk) badge = '<span class="badge badge-fk" title="Khóa ngoại (FK) -> ' + col.fk + '">FK</span>';
+          else if (col.uq) badge = '<span class="badge badge-uq" title="Duy nhất (UQ)">UQ</span>';
+
+          return `
+            <div class="table-column-row" data-col="${col.name}">
+              <div class="col-badge-slot">${badge}</div>
+              <div class="col-name-slot" title="${col.name}">${col.name}</div>
+              <div class="col-type-slot">${col.type}</div>
+            </div>
+          `;
+        }).join("");
+
+        card.innerHTML = `
+          <div class="table-header cluster-${table.cluster.toLowerCase()}">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${table.name}</span>
+            <span style="font-size:8.5px;padding:1px 5px;background:rgba(0,0,0,0.3);border-radius:3px;">${CLUSTER_NAMES[table.cluster] || table.cluster}</span>
+          </div>
+          <div class="table-columns">
+            ${colsHtml}
+          </div>
+        `;
+
+        card.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!justFinishedDrag) {
+            selectTable(table.name);
+          }
+        });
+
+        tablesContainer.appendChild(card);
+      });
+
+            // Build SVG Paths with straight lead-in / lead-out stubs so markers always follow the line 100%
+      ALL_CONNECTIONS.forEach(conn => {
+        const sourceEl = document.getElementById(`table_${conn.sourceTable}`);
+        const targetEl = document.getElementById(`table_${conn.targetTable}`);
+        if (!sourceEl || !targetEl) return;
+
+        const pathData = calculateConnectionPath(conn, 0, 0);
+
+        const markerStartId = getCrowsFootMarkerStart(conn.isUnique, conn.isNotNull);
+        const markerEndId = "marker-one-mandatory";
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("class", "conn-path");
+        path.id = `rel_${conn.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        path.setAttribute("data-source-table", conn.sourceTable);
+        path.setAttribute("data-target-table", conn.targetTable);
+
+        path.setAttribute("marker-start", `url(#${markerStartId})`);
+        path.setAttribute("marker-end", `url(#${markerEndId})`);
+
+        if (pathsLayer) pathsLayer.appendChild(path);
+        else svgRel.appendChild(path);
+      });
+
+      updateVisualStates();
+      updateTransform(true);
+      drawMinimap();
+    }
+
+    function updateVisualStates() {
+      const activeTable = state.activeTable;
+      const neighbors = getNeighbors(activeTable);
+
+      document.querySelectorAll(".table-card").forEach(card => {
+        const tableName = card.getAttribute("data-table");
+        const isSelected = activeTable === tableName;
+        const isNeighbor = activeTable && neighbors.has(tableName);
+        let isDimmed = activeTable ? (!isSelected && !isNeighbor) : false;
+
+        card.classList.toggle("active", isSelected);
+        card.classList.toggle("neighbor", isNeighbor && !isSelected);
+        card.classList.toggle("dimmed", isDimmed);
+      });
+
+      document.querySelectorAll(".conn-path").forEach(path => {
+        const s = path.getAttribute("data-source-table");
+        const t = path.getAttribute("data-target-table");
+        const isDirectActive = activeTable && (s === activeTable || t === activeTable);
+        let isDimmed = activeTable ? !isDirectActive : false;
+
+        path.classList.toggle("active-direct", Boolean(isDirectActive));
+        path.classList.toggle("dimmed", isDimmed);
+      });
+
+      if (btnResetFocus) btnResetFocus.classList.toggle("btn-active-focus", Boolean(activeTable));
+    }
+
+    function fitTablesToView(targetTables, smooth = true, maxZoom = 1.05) {
+      if (!targetTables || targetTables.length === 0) return;
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      targetTables.forEach(t => {
+        const cardW = 280;
+        const cardH = 260;
+        if (t.x < minX) minX = t.x;
+        if (t.y < minY) minY = t.y;
+        if (t.x + cardW > maxX) maxX = t.x + cardW;
+        if (t.y + cardH > maxY) maxY = t.y + cardH;
+      });
+
+      const bboxW = Math.max(maxX - minX + 80, 320);
+      const bboxH = Math.max(maxY - minY + 80, 260);
+
+      const isDrawerOpen = drawer.classList.contains("open");
+      const availW = Math.max(viewport.offsetWidth - (isDrawerOpen ? 550 : 80), 360);
+      const availH = Math.max(viewport.offsetHeight - 80, 300);
+
+      const zoomX = availW / bboxW;
+      const zoomY = availH / bboxH;
+      const idealZoom = Math.min(Math.min(zoomX, zoomY), maxZoom);
+      const finalZoom = Math.min(Math.max(idealZoom, 0.18), maxZoom);
+
+      const centerX = minX + (maxX - minX) / 2;
+      const centerY = minY + (maxY - minY) / 2;
+
+      const targetPanX = (availW / 2) - (centerX * finalZoom) + (isDrawerOpen ? 20 : 0);
+      const targetPanY = (viewport.offsetHeight / 2) - (centerY * finalZoom);
+
+      state.zoom = finalZoom;
+      state.panX = targetPanX;
+      state.panY = targetPanY;
+      updateTransform(smooth);
+      drawMinimap();
+    }
+
+    function focusAndCenterTable(tableName) {
+      const targetTable = DB_SCHEMA.tables.find(t => t.name === tableName);
+      if (!targetTable) return;
+
+      if (state.filter !== "ALL" && targetTable.cluster !== state.filter) {
+        state.filter = "ALL";
+        document.querySelectorAll("#subBarContainer .pill-item").forEach((pill, idx) => {
+          pill.classList.toggle("active", idx === 0);
+        });
+        buildInitialDom();
+      }
+
+      selectTable(tableName);
+    }
+
+    // EXACT LIGHTNING-FAST CENTERING FROM SYSTEM-PRESENTATION-MAP.HTML
+    
+    function selectTable(tableName) {
+      state.activeTable = tableName;
+      const table = DB_SCHEMA.tables.find(t => t.name === tableName);
+      if (!table) return;
+
+      const availW = Math.max(viewport.offsetWidth - 550, 360);
+      const targetZoom = 0.82;
+      const targetPanX = (availW / 2) - ((table.x + 140) * targetZoom);
+      const targetPanY = (viewport.offsetHeight / 2) - ((table.y + 110) * targetZoom);
+
+      state.zoom = targetZoom;
+      state.panX = targetPanX;
+      state.panY = targetPanY;
+
+      // 1. Kick off GPU transform immediately on frame 0
+      updateTransform(true);
+      updateVisualStates();
+
+      // 2. Defer heavy Drawer DOM rendering and 2D canvas redraw so zoom is 100% buttery smooth
+      setTimeout(() => {
+        openDrawer(table);
+        drawMinimap();
+      }, 50);
+    }
+
+
+    function resetFocus() {
+      state.activeTable = null;
+      updateVisualStates();
+      drawer.classList.remove("open");
+      fitTablesToView(state.filter === "ALL" ? DB_SCHEMA.tables : DB_SCHEMA.tables.filter(t => t.cluster === state.filter), true, state.filter === "ALL" ? 0.45 : 0.95);
+      drawMinimap();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toastMessage");
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.style.display = "flex";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 2500);
+    }
+
+    function copyToClipboard(text, successMsg) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg);
+      }).catch(err => {
+        alert("Lỗi copy: " + err.message);
+      });
+    }
+
+    function openDrawer(table) {
+      drawerCategoryBadge.innerText = `CƠ SỞ DỮ LIỆU • ${CLUSTER_NAMES[table.cluster] || table.cluster}`;
+      drawerTableName.innerText = table.name;
+
+      const colsHtml = table.columns.map(c => `
+        <tr>
+          <td><strong>${c.name}</strong></td>
+          <td><code style="color:#38bdf8;font-size:10px;">${c.type}</code></td>
+          <td>
+            ${c.pk ? '<span class="badge badge-pk">PK</span>' : ''}
+            ${c.fk ? '<span class="badge badge-fk">FK: ' + c.fk + '</span>' : ''}
+            ${c.uq ? '<span class="badge badge-uq">UQ</span>' : ''}
+          </td>
+          <td><span style="font-size:10px;color:${c.notNull ? '#f87171' : 'var(--text-muted)'}">${c.notNull ? 'NOT NULL' : 'NULL'}</span></td>
+        </tr>
+      `).join("");
+
+      function getReadableRelDesc(sTable, sCol, tTable, tCol, isOutgoing, isOneToOne) {
+        if (sTable === tTable) {
+          return isOutgoing 
+            ? `Cây phân cấp: Mỗi danh mục con thuộc về 1 danh mục cha.`
+            : `Cây phân cấp: 1 danh mục cha có thể chứa nhiều danh mục con.`;
+        }
+        if (isOneToOne) {
+          return `Quan hệ 1 - 1: Mỗi ${sTable} gắn liền duy nhất với 1 ${tTable}.`;
+        }
+        if (isOutgoing) {
+          return `Mỗi ${sTable} thuộc về 1 ${tTable} tương ứng.`;
+        } else {
+          return `1 ${tTable} có thể liên kết với nhiều ${sTable}.`;
+        }
+      }
+
+      const outgoingFks = ALL_CONNECTIONS.filter(c => c.sourceTable === table.name);
+      let outgoingHtml = outgoingFks.length > 0 ? outgoingFks.map(c => {
+        const isOneToOne = c.sourceCol && c.source.columns.find(col => col.name === c.sourceCol && col.uq);
+        const isSelf = c.sourceTable === c.targetTable;
+        const relType = isSelf ? 'Đệ Quy (N : 1)' : (isOneToOne ? '1 : 1 (Một - Một)' : 'N : 1 (Nhiều - Một)');
+        const badgeClass = isOneToOne ? 'badge-uq' : 'badge-fk';
+        const descText = getReadableRelDesc(c.sourceTable, c.sourceCol, c.targetTable, c.targetCol, true, isOneToOne);
+
+        return `
+          <div class="rel-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div class="rel-card-title" onclick="focusAndCenterTable('${c.targetTable}')">
+                Trỏ đến: <span style="color: var(--border-focus); text-decoration: underline;">${c.targetTable}</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-weight: normal; margin-left: 4px;">(${c.sourceCol} → ${c.targetCol})</span>
+              </div>
+              <span class="badge ${badgeClass}" style="font-size: 9.5px; padding: 1px 6px;">${relType}</span>
+            </div>
+            <div class="rel-card-desc">${descText}</div>
+          </div>
+        `;
+      }).join("") : '<div style="color: var(--text-muted); font-size: 11px; padding: 4px 0;">Không có khóa ngoại tham chiếu ra ngoài (Bảng độc lập).</div>';
+
+      const incomingFks = ALL_CONNECTIONS.filter(c => c.targetTable === table.name);
+      let incomingHtml = incomingFks.length > 0 ? incomingFks.map(c => {
+        const isOneToOne = c.sourceCol && c.source.columns.find(col => col.name === c.sourceCol && col.uq);
+        const isSelf = c.sourceTable === c.targetTable;
+        const relType = isSelf ? 'Đệ Quy (1 : N)' : (isOneToOne ? '1 : 1 (Một - Một)' : '1 : N (Một - Nhiều)');
+        const badgeClass = isOneToOne ? 'badge-uq' : 'badge-pk';
+        const descText = getReadableRelDesc(c.sourceTable, c.sourceCol, c.targetTable, c.targetCol, false, isOneToOne);
+
+        return `
+          <div class="rel-card">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div class="rel-card-title" onclick="focusAndCenterTable('${c.sourceTable}')">
+                Nhận từ: <span style="color: #10b981; text-decoration: underline;">${c.sourceTable}</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-weight: normal; margin-left: 4px;">(${c.sourceCol} → ${c.targetCol})</span>
+              </div>
+              <span class="badge ${badgeClass}" style="font-size: 9.5px; padding: 1px 6px;">${relType}</span>
+            </div>
+            <div class="rel-card-desc">${descText}</div>
+          </div>
+        `;
+      }).join("") : '<div style="color: var(--text-muted); font-size: 11px; padding: 4px 0;">Chưa có bảng con nào tham chiếu đến bảng này.</div>';
+
+      drawerContent.innerHTML = `
+        <div class="script-box">
+          <div class="script-box-title">Nghiệp Vụ Lưu Trữ & Nguyên Lý CSDL</div>
+          <div class="script-box-text">${table.desc}</div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">Phân Hệ & Vai Trò</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="brand-badge">${CLUSTER_NAMES[table.cluster] || table.cluster}</span>
+            <span style="font-size:11.5px;color: var(--text-secondary);">Tổng số: <strong>${table.columns.length}</strong> cột dữ liệu</span>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">Khóa Ngoại Tham Chiếu Đi (Outgoing FKs)</div>
+          <div>${outgoingHtml}</div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">Các Bảng Tham Chiếu Đến (Incoming References)</div>
+          <div>${incomingHtml}</div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">Cấu Trúc Toàn Bộ Cột (${table.columns.length} cột)</div>
+          <table class="detail-table">
+            <thead>
+              <tr><th>Tên Cột</th><th>Kiểu Dữ Liệu</th><th>Ràng Buộc</th><th>Null</th></tr>
+            </thead>
+            <tbody>
+              ${colsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      drawerContent.scrollTop = 0;
+      drawer.classList.add("open");
+    }
+
+    // ==========================================
+    // PNG / SVG EXPORT ENGINE
+    // ==========================================
+    function escapeXml(unsafe) {
+      if (!unsafe) return "";
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function toggleMoreDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById("moreActionsMenu");
+      if (menu) menu.classList.toggle("open");
+    }
+
+    function closeMoreDropdown() {
+      const menu = document.getElementById("moreActionsMenu");
+      if (menu) menu.classList.remove("open");
+    }
+
+    function toggleAppTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      html.setAttribute("data-theme", next);
+      updateVisualStates();
+    }
+
+    window.addEventListener("click", () => {
+      closeMoreDropdown();
+    });
+
+    
+    
+                function generateErdSvgString() {
+      const cardW = 280;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      const visibleTables = DB_SCHEMA.tables.filter(t => state.filter === "ALL" || t.cluster === state.filter);
+      visibleTables.forEach(t => {
+        const h = 34 + t.columns.length * 25 + 8;
+        if (t.x < minX) minX = t.x;
+        if (t.y < minY) minY = t.y;
+        if (t.x + cardW > maxX) maxX = t.x + cardW;
+        if (t.y + h > maxY) maxY = t.y + h;
+      });
+
+      const pad = 60;
+      const totalW = Math.max(maxX - minX + pad * 2, 1000);
+      const totalH = Math.max(maxY - minY + pad * 2, 800);
+      const offX = pad - minX;
+      const offY = pad - minY;
+
+      // Read current theme to produce a pixel-perfect matching export
+      const isLight = document.documentElement.getAttribute("data-theme") === "light";
+      const C = isLight ? {
+        bg:         "#f1f5f9",
+        bgCard:     "#ffffff",
+        cardStroke: "#cbd5e1",
+        textCol:    "#0f172a",
+        textType:   "#64748b",
+        rowDiv:     "rgba(0,0,0,0.06)",
+        dot:        "#94a3b8",
+        line:       "#0284c7",
+        lineOp:     "0.75",
+        markerFill: "#ffffff"
+      } : {
+        bg:         "#070a13",
+        bgCard:     "#0d1424",
+        cardStroke: "#223554",
+        textCol:    "#ffffff",
+        textType:   "#cbd5e1",
+        rowDiv:     "rgba(255,255,255,0.04)",
+        dot:        "#64748b",
+        line:       "#38bdf8",
+        lineOp:     "0.85",
+        markerFill: "#0d1424"
+      };
+
+      let svgContent = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + totalW + ' ' + totalH + '" width="' + totalW + '" height="' + totalH + '" style="background: ' + C.bg + '; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Segoe UI, sans-serif;">\n' +
+'  <defs>\n' +
+'    <style>\n' +
+'      .tbl-card { fill: ' + C.bgCard + '; stroke: ' + C.cardStroke + '; stroke-width: 1.2; }\n' +
+'      .tbl-header-txt { fill: #ffffff; font-size: 12px; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }\n' +
+'      .tbl-sub-txt { fill: #ffffff; font-size: 9px; opacity: 0.9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }\n' +
+'      .col-txt { fill: ' + C.textCol + '; font-size: 11px; font-weight: 600; }\n' +
+'      .type-txt { fill: ' + C.textType + '; font-size: 9.5px; text-anchor: end; }\n' +
+'      .conn-line { fill: none; stroke: ' + C.line + '; stroke-width: 1.6px; opacity: ' + C.lineOp + '; }\n' +
+'      .badge-bg-pk { fill: rgba(251, 191, 36, 0.2); stroke: #fbbf24; stroke-width: 0.8; }\n' +
+'      .badge-bg-fk { fill: rgba(56, 189, 248, 0.2); stroke: #38bdf8; stroke-width: 0.8; }\n' +
+'      .badge-bg-uq { fill: rgba(192, 132, 252, 0.2); stroke: #c084fc; stroke-width: 0.8; }\n' +
+'      .badge-txt-pk { fill: #fbbf24; font-size: 8.5px; font-weight: 800; text-anchor: middle; }\n' +
+'      .badge-txt-fk { fill: #38bdf8; font-size: 8.5px; font-weight: 800; text-anchor: middle; }\n' +
+'      .badge-txt-uq { fill: #c084fc; font-size: 8.5px; font-weight: 800; text-anchor: middle; }\n' +
+'      .dot { fill: ' + C.dot + '; opacity: 0.5; }\n' +
+'      .marker-circ { fill: ' + C.markerFill + '; }\n' +
+'    </style>\n' +
+'    <marker id="exp-marker-one-mandatory" viewBox="0 0 20 10" refX="20" refY="5" markerWidth="11" markerHeight="7" orient="auto">\n' +
+'      <line x1="5.5" y1="1" x2="5.5" y2="9" stroke="' + C.line + '" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <line x1="9.5" y1="1" x2="9.5" y2="9" stroke="' + C.line + '" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <line x1="9.5" y1="5" x2="20" y2="5" stroke="' + C.line + '" stroke-width="1.4" />\n' +
+'    </marker>\n' +
+'    <marker id="exp-marker-many-mandatory" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12" markerHeight="7" orient="auto">\n' +
+'      <line x1="0" y1="5" x2="7" y2="5" stroke="' + C.line + '" stroke-width="1.4" />\n' +
+'      <path d="M 7 1.5 L 14 5 L 7 8.5 M 7 5 L 14 5" fill="none" stroke="' + C.line + '" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <line x1="16" y1="1" x2="16" y2="9" stroke="' + C.line + '" stroke-width="1.3" stroke-linecap="round" />\n' +
+'    </marker>\n' +
+'    <marker id="exp-marker-many-optional" viewBox="0 0 24 10" refX="0" refY="5" markerWidth="13" markerHeight="7" orient="auto">\n' +
+'      <line x1="0" y1="5" x2="7" y2="5" stroke="' + C.line + '" stroke-width="1.4" />\n' +
+'      <path d="M 7 1.5 L 13 5 L 7 8.5 M 7 5 L 13 5" fill="none" stroke="' + C.line + '" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <circle cx="17" cy="5" r="2.3" class="marker-circ" stroke="' + C.line + '" stroke-width="1.3" />\n' +
+'    </marker>\n' +
+'    <marker id="exp-marker-one-unique-mandatory" viewBox="0 0 20 10" refX="0" refY="5" markerWidth="11" markerHeight="7" orient="auto">\n' +
+'      <line x1="0" y1="5" x2="7" y2="5" stroke="#c084fc" stroke-width="1.4" />\n' +
+'      <line x1="10" y1="1" x2="10" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <line x1="14" y1="1" x2="14" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />\n' +
+'    </marker>\n' +
+'    <marker id="exp-marker-one-unique-optional" viewBox="0 0 22 10" refX="0" refY="5" markerWidth="12" markerHeight="7" orient="auto">\n' +
+'      <line x1="0" y1="5" x2="7" y2="5" stroke="#c084fc" stroke-width="1.4" />\n' +
+'      <line x1="10" y1="1" x2="10" y2="9" stroke="#c084fc" stroke-width="1.3" stroke-linecap="round" />\n' +
+'      <circle cx="15.5" cy="5" r="2.3" class="marker-circ" stroke="#c084fc" stroke-width="1.3" />\n' +
+'    </marker>\n' +
+'  </defs>\n\n' +
+'  <!-- BACKGROUND -->\n' +
+'  <rect width="' + totalW + '" height="' + totalH + '" fill="' + C.bg + '" />\n\n' +
+'  <!-- 1. RELATIONSHIPS LAYER -->\n' +
+'  <g id="relationships-layer">\n';
+
+      const visibleNames = new Set(visibleTables.map(t => t.name));
+      ALL_CONNECTIONS.forEach(conn => {
+        if (!visibleNames.has(conn.sourceTable) || !visibleNames.has(conn.targetTable)) return;
+        const pathData = calculateConnectionPath(conn, offX, offY);
+        const expMarkerStart = 'exp-' + getCrowsFootMarkerStart(conn.isUnique, conn.isNotNull);
+        svgContent += '    <path d="' + pathData + '" class="conn-line" marker-start="url(#' + expMarkerStart + ')" marker-end="url(#exp-marker-one-mandatory)" />\n';
+      });
+
+      svgContent += '  </g>\n\n  <!-- 2. TABLES LAYER -->\n  <g id="tables-layer">\n';
+
+      visibleTables.forEach(t => {
+        const tx = t.x + offX;
+        const ty = t.y + offY;
+        const cardH = 34 + t.columns.length * 25 + 6;
+        const headerColor = CLUSTER_HEX[t.cluster] || "#38bdf8";
+        const clusterLabel = escapeXml(CLUSTER_NAMES[t.cluster] || t.cluster);
+
+        svgContent += '\n' +
+'    <!-- Table: ' + escapeXml(t.name) + ' -->\n' +
+'    <g transform="translate(' + tx + ', ' + ty + ')">\n' +
+'      <rect width="' + cardW + '" height="' + cardH + '" rx="8" ry="8" class="tbl-card" />\n' +
+'      <path d="M 0 8 Q 0 0 8 0 L ' + (cardW - 8) + ' 0 Q ' + cardW + ' 0 ' + cardW + ' 8 L ' + cardW + ' 32 L 0 32 Z" fill="' + headerColor + '" />\n' +
+'      <text x="10" y="21" class="tbl-header-txt">' + escapeXml(t.name) + '</text>\n' +
+'      <text x="' + (cardW - 10) + '" y="20" class="tbl-sub-txt" text-anchor="end">' + clusterLabel + '</text>\n';
+
+        t.columns.forEach((col, idx) => {
+          const rowY = 32 + idx * 25;
+          svgContent += '      <line x1="0" y1="' + rowY + '" x2="' + cardW + '" y2="' + rowY + '" stroke="' + C.rowDiv + '" />\n';
+          if (col.pk) {
+            svgContent += '      <rect x="6" y="' + (rowY+5) + '" width="22" height="14" rx="3" class="badge-bg-pk" />\n' +
+                          '      <text x="17" y="' + (rowY+15) + '" class="badge-txt-pk">PK</text>\n';
+          } else if (col.fk) {
+            svgContent += '      <rect x="6" y="' + (rowY+5) + '" width="22" height="14" rx="3" class="badge-bg-fk" />\n' +
+                          '      <text x="17" y="' + (rowY+15) + '" class="badge-txt-fk">FK</text>\n';
+          } else if (col.uq) {
+            svgContent += '      <rect x="6" y="' + (rowY+5) + '" width="22" height="14" rx="3" class="badge-bg-uq" />\n' +
+                          '      <text x="17" y="' + (rowY+15) + '" class="badge-txt-uq">UQ</text>\n';
+          } else {
+            svgContent += '      <circle cx="17" cy="' + (rowY+12) + '" r="2" class="dot" />\n';
+          }
+          svgContent += '      <text x="34" y="' + (rowY+16) + '" class="col-txt">' + escapeXml(col.name) + '</text>' +
+                        '<text x="' + (cardW-8) + '" y="' + (rowY+16) + '" class="type-txt">' + escapeXml(col.type) + '</text>\n';
+        });
+
+        svgContent += '    </g>\n';
+      });
+
+      svgContent += '  </g>\n</svg>';
+      return { svgContent, totalW, totalH };
+    }
+
+
+
+
+    function exportErdVectorSvg() {
+      try {
+        const { svgContent } = generateErdSvgString();
+        const blob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const totalCount = DB_SCHEMA.tables.length;
+        a.href = url;
+        a.download = `QueenBeautiful_Database_ERD_${totalCount}Tables.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (err) {
+        alert("Lỗi xuất SVG: " + err.message);
+      }
+    }
+
+        function exportErdHighResPng() {
+      try {
+        const { svgContent, totalW, totalH } = generateErdSvgString();
+        const svgBlob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(svgBlob);
+        const img = new Image();
+        const totalCount = DB_SCHEMA.tables.length;
+        
+        img.onload = function() {
+          try {
+            // High-DPI 2x scale for razor-sharp crystal clear Ultra-HD export
+            const scale = 2;
+            const canvas = document.createElement("canvas");
+            canvas.width = totalW * scale;
+            canvas.height = totalH * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
+            const isLightTheme = document.documentElement.getAttribute("data-theme") === "light";
+            ctx.fillStyle = isLightTheme ? "#f1f5f9" : "#070a13";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, 0, 0, totalW, totalH);
+            URL.revokeObjectURL(blobUrl);
+
+            canvas.toBlob(function(pngBlob) {
+              if (!pngBlob) {
+                const pngData = canvas.toDataURL("image/png");
+                const a = document.createElement("a");
+                a.href = pngData;
+                a.download = `QueenBeautiful_Database_ERD_${totalCount}Tables_UltraHD.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+              }
+              const pngUrl = URL.createObjectURL(pngBlob);
+              const a = document.createElement("a");
+              a.href = pngUrl;
+              a.download = `QueenBeautiful_Database_ERD_${totalCount}Tables_UltraHD.png`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(pngUrl), 1000);
+            }, "image/png");
+          } catch(e) {
+            exportErdVectorSvg();
+          }
+        };
+
+        img.onerror = function(err) {
+          exportErdVectorSvg();
+        };
+
+        img.src = blobUrl;
+      } catch(err) {
+        alert("Lỗi xuất PNG: " + err.message);
+      }
+    }
+
+    // ==========================================
+    // SEARCH SYSTEM
+    // ==========================================
+    function performSearch() {
+      const rawQuery = searchInput.value.trim();
+      const normQuery = normalizeStr(rawQuery);
+
+      if (!normQuery) {
+        searchResultsDropdown.style.display = "none";
+        searchResultsDropdown.innerHTML = "";
+        return;
+      }
+
+      const results = [];
+
+      DB_SCHEMA.tables.forEach(table => {
+        const normTableName = normalizeStr(table.name);
+        if (normTableName.includes(normQuery)) {
+          results.push({
+            type: "TABLE",
+            tableName: table.name,
+            cluster: CLUSTER_NAMES[table.cluster] || table.cluster,
+            matchText: `Bảng CSDL: ${table.name}`
+          });
+        }
+      });
+
+      DB_SCHEMA.tables.forEach(table => {
+        table.columns.forEach(col => {
+          const normColName = normalizeStr(col.name);
+          if (normColName.includes(normQuery)) {
+            if (!results.some(r => r.tableName === table.name && r.type === "TABLE")) {
+              results.push({
+                type: "COLUMN",
+                tableName: table.name,
+                cluster: CLUSTER_NAMES[table.cluster] || table.cluster,
+                colName: col.name,
+                matchText: `Cột: ${col.name} (trong bảng ${table.name})`
+              });
+            }
+          }
+        });
+      });
+
+      if (results.length === 0) {
+        searchResultsDropdown.innerHTML = `<div style="padding: 10px 14px; color: #cbd5e1; font-size: 12px;">Không tìm thấy kết quả phù hợp cho "${rawQuery}"</div>`;
+        searchResultsDropdown.style.display = "block";
+        return;
+      }
+
+      searchResultsDropdown.innerHTML = results.slice(0, 10).map((res, index) => `
+        <div class="search-item ${index === 0 ? "selected" : ""}" data-table="${res.tableName}">
+          <div class="search-item-title">
+            <span><i class="fa-solid ${res.type === "TABLE" ? "fa-table" : "fa-columns"}" style="font-size:10px;margin-right:6px;color:#38bdf8;"></i>${res.tableName}</span>
+            <span class="brand-badge" style="font-size: 9px;">${res.cluster}</span>
+          </div>
+          <span class="search-item-match">${res.matchText}</span>
+        </div>
+      `).join("");
+
+      searchResultsDropdown.querySelectorAll(".search-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const tbl = item.getAttribute("data-table");
+          focusAndCenterTable(tbl);
+          searchResultsDropdown.style.display = "none";
+        });
+      });
+
+      searchResultsDropdown.style.display = "block";
+    }
+
+    searchInput.addEventListener("input", performSearch);
+    searchInput.addEventListener("focus", performSearch);
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const topItem = searchResultsDropdown.querySelector(".search-item");
+        if (topItem) {
+          const tbl = topItem.getAttribute("data-table");
+          focusAndCenterTable(tbl);
+          searchResultsDropdown.style.display = "none";
+          searchInput.blur();
+        }
+      } else if (e.key === "Escape") {
+        searchResultsDropdown.style.display = "none";
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-box")) {
+        searchResultsDropdown.style.display = "none";
+      }
+    });
+
+    // ==========================================
+    // PAN / ZOOM & DRAG ENGINE (FROM SYSTEM-PRESENTATION-MAP.HTML)
+    // ==========================================
+    viewport.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      if (e.target.closest(".presentation-panel") || e.target.closest(".panel-close-btn") || e.target.closest(".navbar") || e.target.closest(".sub-bar") || e.target.closest("button") || e.target.closest("input")) return;
+
+      state.isDragging = true;
+      state.hasDragged = false;
+      state.startClientX = e.clientX;
+      state.startClientY = e.clientY;
+      state.startX = e.clientX - state.panX;
+      state.startY = e.clientY - state.panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!state.isDragging) return;
+      const dx = e.clientX - state.startClientX;
+      const dy = e.clientY - state.startClientY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 5) {
+        state.hasDragged = true;
+        viewport.classList.add("dragging");
+      }
+
+      if (state.hasDragged) {
+        state.panX = e.clientX - state.startX;
+        state.panY = e.clientY - state.startY;
+        updateTransform(false);
+        updateMinimapLens();
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (state.isDragging) {
+        if (state.hasDragged) {
+          justFinishedDrag = true;
+          setTimeout(() => { justFinishedDrag = false; }, 80);
+        }
+        state.isDragging = false;
+        viewport.classList.remove("dragging");
+        drawMinimap();
+      }
+    });
+
+    window.addEventListener("click", (e) => {
+      if (justFinishedDrag) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+
+    function setCluster(clusterName, evt) {
+      state.filter = clusterName;
+      state.activeTable = null;
+
+      document.querySelectorAll("#subBarContainer .pill-item").forEach(p => p.classList.remove("active"));
+      if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add("active");
+      }
+
+      buildInitialDom();
+
+      if (clusterName === "ALL") {
+        fitTablesToView(DB_SCHEMA.tables, true, 0.45);
+      } else {
+        const clusterTables = DB_SCHEMA.tables.filter(t => t.cluster === clusterName);
+        if (clusterTables.length > 0) {
+          fitTablesToView(clusterTables, true, 0.95);
+        }
+      }
+    }
+
+    viewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY > 0 ? 0.92 : 1.08;
+      const newZoom = Math.min(Math.max(state.zoom * zoomFactor, 0.1), 2.0);
+      
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      state.panX = mouseX - (mouseX - state.panX) * (newZoom / state.zoom);
+      state.panY = mouseY - (mouseY - state.panY) * (newZoom / state.zoom);
+      state.zoom = newZoom;
+
+      updateTransform(false);
+      updateMinimapLens();
+    }, { passive: false });
+
+    // MINIMAP (4800px x 2800px)
+    function drawMinimap() {
+      const minimap = document.getElementById("minimap");
+      if (!minimap) return;
+      const ctx = minimap.getContext("2d");
+      const w = minimap.width = minimap.offsetWidth;
+      const h = minimap.height = minimap.offsetHeight;
+
+      const isLight = document.documentElement.getAttribute("data-theme") === "light";
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.05)";
+      ctx.fillRect(0, 0, w, h);
+
+      const scaleX = w / 6650; const scaleY = h / 3404;
+
+      DB_SCHEMA.tables.forEach(t => {
+        if (t.name === state.activeTable) {
+          ctx.fillStyle = isLight ? "#0284c7" : "#38bdf8";
+        } else {
+          ctx.fillStyle = isLight ? "rgba(71, 85, 105, 0.3)" : "rgba(255, 255, 255, 0.25)";
+        }
+        ctx.fillRect(t.x * scaleX, t.y * scaleY, 270 * scaleX, 120 * scaleY);
+      });
+
+      updateMinimapLens();
+    }
+
+    // KEYBOARD SHORTCUTS
+    window.addEventListener("keydown", (e) => {
+      if (e.target === searchInput) {
+        if (e.key === "Escape") {
+          searchResultsDropdown.style.display = "none";
+          searchInput.blur();
+        }
+        return;
+      }
+
+      if (e.key === "Escape") {
+        drawer.classList.remove("open");
+        return;
+      }
+
+      if (e.key === "/" || (e.ctrlKey && e.key.toLowerCase() === "k")) {
+        e.preventDefault();
+        searchInput.focus();
+        return;
+      }
+
+      if (e.key === "+" || e.key === "=") {
+        state.zoom = Math.min(state.zoom * 1.2, 2.0);
+        updateTransform(true);
+        drawMinimap();
+        return;
+      }
+
+      if (e.key === "-" || e.key === "_") {
+        state.zoom = Math.max(state.zoom * 0.8, 0.1);
+        updateTransform(true);
+        drawMinimap();
+        return;
+      }
+    });
+
+    // RUN INITIALIZATION
+    buildInitialDom();
+    fitTablesToView(DB_SCHEMA.tables, false, 0.45);
+  </script>
+</body>
+</html>
